@@ -168,7 +168,7 @@ export function Hero() {
               className={
                 s.highlight
                   ? "mx-3 flex items-center gap-[clamp(12px,1.5vw,22px)] rounded-xl bg-[linear-gradient(180deg,#d6a94e,#b08431)] px-[clamp(14px,2.2vw,34px)] py-4 text-brand-deep shadow-[0_10px_28px_#00000040] ring-1 ring-white/30 nav:-my-[30px] nav:mr-[18px]"
-                  : "flex items-center gap-[clamp(14px,1.8vw,26px)] border-white/20 px-[clamp(16px,3.2vw,56px)] py-4 min-[560px]:max-[1239px]:odd:border-r nav:not-last:border-r"
+                  : "flex items-center gap-[clamp(14px,1.8vw,26px)] border-white/20 px-[clamp(16px,3.2vw,56px)] py-4 min-[560px]:max-[1439px]:odd:border-r nav:not-last:border-r"
               }
             >
               <span className={`flex-none ${s.highlight ? "text-brand-deep" : "text-gold"}`}>{s.icon}</span>

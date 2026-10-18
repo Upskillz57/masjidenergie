@@ -1,6 +1,6 @@
 "use server";
 
-import { emailLayout, escapeHtml, sendEmail, teamInbox } from "@/lib/email";
+import { emailLayout, emailTable, sendEmail, teamInbox } from "@/lib/email";
 import { site } from "@/lib/site";
 import { BILL_ACCEPT, MAX_BILLS, MAX_BILLS_BYTES, type StudyRequestState } from "@/lib/study";
 import { createAdminClient, DOCUMENTS_BUCKET, isSupabaseConfigured } from "@/lib/supabase/server";
@@ -89,18 +89,19 @@ export async function submitStudyRequest(formData: FormData): Promise<StudyReque
     ["Factures", bills.length ? bills.map((f) => f.name).join(", ") : "Aucune"],
   ];
   if (data.message) rows.push(["Message", data.message]);
-  const table = `<table cellpadding="6">${rows
-    .map(([k, v]) => `<tr><td><strong>${escapeHtml(k)}</strong></td><td>${escapeHtml(v).replace(/\n/g, "<br>")}</td></tr>`)
-    .join("")}</table>`;
 
   const sent = await sendEmail({
     to: teamInbox(),
     replyTo: data.email,
     subject: `${saved ? `Demande n°${saved.number} : ` : "Demande d’étude : "}${data.mosqueName}${data.chargers ? " (+ bornes de recharge)" : ""}`,
     html: emailLayout(
-      "Nouvelle demande d’étude",
-      table,
-      saved ? { label: "Ouvrir dans l’espace admin", href: `${site.url}/admin/demandes/${saved.id}` } : undefined,
+      `Nouvelle demande d’étude : ${data.mosqueName}`,
+      emailTable(rows),
+      saved ? { label: "Ouvrir la demande dans l’espace admin", href: `${site.url}/admin/demandes/${saved.id}` } : undefined,
+      {
+        eyebrow: saved ? `Demande n°${saved.number}` : "Demande d’étude",
+        preheader: `${data.firstName} ${data.lastName} · ${data.phone}${bills.length ? ` · ${bills.length} facture(s)` : ""}`,
+      },
     ),
     attachments: saved
       ? undefined

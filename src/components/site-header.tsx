@@ -36,12 +36,12 @@ export function SiteHeader() {
 
   return (
     <div className="absolute inset-x-0 top-0 z-20">
-      <header className="mx-auto flex h-[90px] max-w-[1536px] items-center gap-6 px-[clamp(20px,5.7vw,88px)] pt-[10px]">
+      <header className="mx-auto flex h-[90px] max-w-[1536px] items-center gap-[clamp(12px,1.4vw,24px)] px-[clamp(20px,4vw,88px)] pt-[10px]">
         <Wordmark />
 
         <nav
           aria-label="Navigation principale"
-          className="ml-[clamp(20px,4vw,62px)] hidden gap-[clamp(18px,2.1vw,33px)] whitespace-nowrap text-[13.5px] nav:flex"
+          className="ml-[clamp(16px,2.6vw,62px)] hidden gap-[clamp(16px,1.7vw,33px)] whitespace-nowrap text-[13.5px] nav:flex"
         >
           {links.map((n) => (
             <Link
@@ -62,12 +62,6 @@ export function SiteHeader() {
 
         <div className="flex-1" />
 
-        <Link
-          href="/connexion"
-          className="mr-4 hidden flex-none whitespace-nowrap text-[13.5px] font-semibold text-brand-text hover:underline min-[1400px]:block"
-        >
-          Espace mosquée
-        </Link>
         <a
           href="#etude"
           className="hidden flex-none items-center gap-3.5 whitespace-nowrap rounded-[9px] bg-brand px-5 py-3.5 text-[13.5px] font-semibold text-white shadow-[0_0_0_2px_#ffffff,0_6px_16px_#0e5c4733] hover:bg-brand-hover sm:flex dark:shadow-[0_0_0_2px_#ffffff22,0_6px_16px_#00000055]"
@@ -75,6 +69,16 @@ export function SiteHeader() {
           Demander une étude <ArrowRight className="size-[15px]" />
         </a>
         <ThemeToggle />
+        <Link
+          href="/connexion"
+          aria-label="Espace mosquée : connexion"
+          title="Espace mosquée"
+          className="hidden size-[30px] flex-none items-center justify-center rounded-full bg-white text-brand shadow-[0_2px_8px_#00000022] hover:text-brand-hover nav:flex dark:bg-card dark:text-gold"
+        >
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" className="size-[16px]" aria-hidden>
+            <path d="M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8M4 21v-1a7 7 0 0 1 14 0v1" />
+          </svg>
+        </Link>
 
         <button
           type="button"

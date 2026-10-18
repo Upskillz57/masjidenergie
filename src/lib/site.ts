@@ -3,7 +3,8 @@ export const site = {
   company: "YGB Développement",
   description:
     "Masjid Energie, une solution de YGB Développement, accompagne les mosquées de France dans leur transition énergétique grâce au photovoltaïque.",
-  url: process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000",
+  // Adresse publique, sans « . » ni « / » final (liens des e-mails, QR codes, sitemap).
+  url: (process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000").trim().replace(/[./]+$/, ""),
   // URL d'intégration (YouTube /embed/…, Vimeo…). Vide = bouton « Voir notre vidéo » masqué.
   videoUrl: process.env.NEXT_PUBLIC_VIDEO_URL ?? "",
   contact: {

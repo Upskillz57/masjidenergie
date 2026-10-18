@@ -1,0 +1,30 @@
+LOGO MASJID ENERGIE — FICHIERS
+================================
+
+Versions
+- couleur     : sur fond clair (blanc, beige). Version principale.
+- blanc       : sur fond foncé (vert du site #0a3d2e, photo sombre). Pictogramme or + texte blanc.
+- mono-blanc  : une seule couleur, blanc. Marquage, gravure, fond très chargé.
+- mono-vert   : une seule couleur, vert #0e5c47. Tampon, impression économique.
+
+Formes
+- logo-horizontal : pictogramme à gauche du nom (en-têtes, signatures, papier à lettres).
+- logo-vertical   : pictogramme au-dessus du nom (affiches, kakémonos, carrés).
+- pictogramme     : le symbole seul (petits formats, filigrane).
+- icone-app       : symbole sur carré vert arrondi (photo de profil réseaux sociaux, favicon).
+
+Formats
+- svg/    vectoriel, pour le web et les graphistes (texte converti en tracés).
+- pdf/    vectoriel, pour l'imprimeur (cartes de visite, flyers, bâches).
+- png/    fond transparent, 3 ou 4 tailles (Word, PowerPoint, Canva, réseaux sociaux).
+- jpg/    fond plein, pour les outils qui n'acceptent pas la transparence.
+- webp/   léger, pour le web.
+- icones/ icône d'application et favicon.ico.
+
+Couleurs
+- Vert Masjid Energie : #0e5c47   (vert profond #0a3d2e)
+- Or                  : #c8a24c   (or clair #e3c97a)
+- Police              : Montserrat (Bold / Regular, sous-titre SemiBold)
+
+Règles : ne pas déformer, ne pas changer les couleurs, garder de l'espace libre autour
+(au moins la hauteur du croissant de lune).

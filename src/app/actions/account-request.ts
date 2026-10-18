@@ -1,6 +1,6 @@
 "use server";
 
-import { emailLayout, escapeHtml, sendEmail, teamInbox } from "@/lib/email";
+import { emailLayout, emailTable, sendEmail, teamInbox } from "@/lib/email";
 import { site } from "@/lib/site";
 import { createAdminClient, isSupabaseConfigured } from "@/lib/supabase/server";
 
@@ -57,10 +57,17 @@ export async function submitAccountRequest(_: AccountRequestState, formData: For
     replyTo: data.email,
     subject: `Demande de compte n°${row.number} : ${data.mosque_name}`,
     html: emailLayout(
-      "Nouvelle demande de création de compte",
-      `<p><strong>${escapeHtml(data.mosque_name)}</strong>${data.mosque_address ? ` · ${escapeHtml(data.mosque_address)}` : ""}</p>
-<p>${escapeHtml(`${data.first_name} ${data.last_name}`)}${data.role_in_mosque ? ` (${escapeHtml(data.role_in_mosque)})` : ""}<br>${escapeHtml(data.phone)} · ${escapeHtml(data.email)}</p>`,
+      `Demande de compte : ${data.mosque_name}`,
+      emailTable([
+        ["Mosquée", data.mosque_name],
+        ["Adresse", data.mosque_address ?? "—"],
+        ["Responsable", `${data.first_name} ${data.last_name}${data.role_in_mosque ? ` (${data.role_in_mosque})` : ""}`],
+        ["Téléphone", data.phone],
+        ["E-mail", data.email],
+        ...(data.message ? ([["Message", data.message]] as [string, string][]) : []),
+      ]),
       { label: "Valider dans l’espace admin", href: `${site.url}/admin/comptes` },
+      { eyebrow: `Demande de compte n°${row.number}`, preheader: `${data.first_name} ${data.last_name} · ${data.phone}` },
     ),
   });
 

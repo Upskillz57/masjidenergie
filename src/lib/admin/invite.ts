@@ -58,6 +58,7 @@ export async function inviteUser(input: {
           : "Un compte vous a été créé pour gérer les demandes d’étude. Choisissez votre mot de passe pour y accéder."
       }</p><p style="color:#55605c;font-size:13px">Ce lien est valable 24 heures et ne peut être utilisé qu’une fois.</p>`,
       { label: "Choisir mon mot de passe", href: confirmUrl(link.data.properties.hashed_token, type) },
+      { eyebrow: isMosque ? "Espace mosquée" : "Espace admin", preheader: "Choisissez votre mot de passe pour accéder à votre espace." },
     ),
   });
   return sent ? { ok: true } : { ok: false, message: "Compte créé, mais l’e-mail d’invitation n’a pas pu partir." };
@@ -75,6 +76,7 @@ export async function sendPasswordReset(email: string) {
       "Réinitialiser votre mot de passe",
       "<p>Vous avez demandé à changer votre mot de passe. Si ce n’est pas vous, ignorez cet e-mail.</p>",
       { label: "Choisir un nouveau mot de passe", href: confirmUrl(link.data.properties.hashed_token, "recovery") },
+      { eyebrow: "Sécurité du compte", preheader: "Lien de réinitialisation valable 24 heures." },
     ),
   });
 }

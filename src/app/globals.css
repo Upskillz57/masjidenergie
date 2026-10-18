@@ -62,7 +62,7 @@
   --font-script: var(--font-kristi);
   --font-arabic: var(--font-amiri);
 
-  --breakpoint-nav: 1240px;
+  --breakpoint-nav: 1440px;
 }
 
 html {
