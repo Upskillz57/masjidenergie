@@ -80,12 +80,21 @@ export const telHref = (phone: string) => `tel:${phone.replace(/[^\d+]/g, "")}`;
 
 export const withProtocol = (url: string) => (/^https?:\/\//i.test(url) ? url : `https://${url}`);
 
+/** Numéro français au format international (06 12 34 56 78 → +33 6 12 34 56 78), lu partout dans le monde. */
+export const intlPhone = (phone: string) => {
+  const digits = phone.replace(/[^\d+]/g, "");
+  if (/^0\d{9}$/.test(digits)) return `+33 ${digits.slice(1, 2)} ${digits.slice(2).replace(/(\d{2})(?=\d)/g, "$1 ")}`;
+  if (/^0033\d{9}$/.test(digits)) return `+33 ${digits.slice(4)}`;
+  return phone.trim();
+};
+
 /** Échappement vCard 3.0 (RFC 2426) : antislash, virgule, point-virgule, retours à la ligne. */
 const esc = (s: string) => s.replace(/\\/g, "\\\\").replace(/\n/g, "\\n").replace(/,/g, "\\,").replace(/;/g, "\\;");
 
 /**
  * Fiche contact au format vCard 3.0, reconnue par iPhone (Contacts) et Android (Contacts Google).
- * `compact` retire la note pour garder un QR code lisible.
+ * `compact` (QR code) ne garde que l'essentiel — nom, organisation, fonction, téléphones, e-mail — pour un code
+ * peu dense, lisible même affiché en petit sur un écran.
  */
 export function toVCard(card: CardFields, opts: { cardUrl?: string; compact?: boolean } = {}) {
   const isCompany = card.brand === "mosquee";
@@ -99,13 +108,15 @@ export function toVCard(card: CardFields, opts: { cardUrl?: string; compact?: bo
   ];
   if (isCompany) lines.push("X-ABShowAs:COMPANY");
   if (card.job_title) lines.push(`TITLE:${esc(card.job_title)}`);
-  if (card.mobile) lines.push(`TEL;TYPE=CELL:${esc(card.mobile)}`);
-  if (card.phone) lines.push(`TEL;TYPE=WORK,VOICE:${esc(card.phone)}`);
+  if (card.mobile) lines.push(`TEL;TYPE=CELL:${esc(intlPhone(card.mobile))}`);
+  if (card.phone) lines.push(`TEL;TYPE=WORK,VOICE:${esc(intlPhone(card.phone))}`);
   if (card.email) lines.push(`EMAIL;TYPE=INTERNET,WORK:${esc(card.email)}`);
-  if (card.website) lines.push(`URL:${esc(withProtocol(card.website))}`);
-  else if (opts.cardUrl) lines.push(`URL:${esc(opts.cardUrl)}`);
-  if (card.address) lines.push(`ADR;TYPE=WORK:;;${esc(card.address)};;;;`);
-  if (card.note && !opts.compact) lines.push(`NOTE:${esc(card.note)}`);
+  if (!opts.compact) {
+    if (card.website) lines.push(`URL:${esc(withProtocol(card.website))}`);
+    else if (opts.cardUrl) lines.push(`URL:${esc(opts.cardUrl)}`);
+    if (card.address) lines.push(`ADR;TYPE=WORK:;;${esc(card.address)};;;;`);
+    if (card.note) lines.push(`NOTE:${esc(card.note)}`);
+  }
   lines.push("END:VCARD");
   return lines.join("\r\n") + "\r\n";
 }

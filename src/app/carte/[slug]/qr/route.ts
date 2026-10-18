@@ -12,8 +12,12 @@ export async function GET(request: Request, { params }: { params: Promise<{ slug
   const type = search.get("type") === "lien" ? "lien" : "contact";
   const format = search.get("format") === "png" ? "png" : "svg";
   const url = cardUrl(slug);
-  const text = type === "lien" ? url : toVCard(card, { cardUrl: url, compact: true });
-  const opts = { margin: 2, errorCorrectionLevel: "M" as const, color: { dark: "#0a3d2e", light: "#ffffff" } };
+  const text = type === "lien" ? url : toVCard(card, { compact: true });
+  const opts = {
+    margin: 4,
+    errorCorrectionLevel: type === "lien" ? ("M" as const) : ("L" as const),
+    color: { dark: "#0a2e23", light: "#ffffff" },
+  };
   const filename = `qr-${type}-${slug}.${format}`;
   const headers = {
     "Content-Disposition": `${search.get("dl") ? "attachment" : "inline"}; filename="${filename}"`,

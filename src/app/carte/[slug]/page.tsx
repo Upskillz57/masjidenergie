@@ -97,11 +97,11 @@ async function Card({ params }: { params: Params }) {
       {card.note && <p className="mt-5 px-1 text-center text-[14.5px] leading-relaxed text-muted">{card.note}</p>}
 
       <section className="mt-6 grid justify-items-center gap-3 rounded-2xl border border-line bg-card px-5 py-6 text-center">
-        <h2 className="text-[15px] font-bold text-heading">Faites scanner ce code</h2>
+        <h2 className="text-[16px] font-bold text-heading">Scannez pour enregistrer le contact</h2>
         <p className="max-w-[300px] text-[13.5px] text-muted">
           Avec l’appareil photo d’un iPhone ou d’un Android, le contact s’enregistre directement.
         </p>
-        <div className="w-[220px] rounded-xl bg-white p-3 [&_svg]:h-auto [&_svg]:w-full" dangerouslySetInnerHTML={{ __html: contact }} />
+        <div className="w-[min(260px,100%)] rounded-xl bg-white p-3 [&_svg]:h-auto [&_svg]:w-full" dangerouslySetInnerHTML={{ __html: contact }} />
       </section>
 
       <div className="mt-5 grid gap-3">

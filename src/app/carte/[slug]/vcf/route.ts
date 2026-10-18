@@ -18,7 +18,8 @@ export async function GET(_: Request, { params }: { params: Promise<{ slug: stri
   return new Response(toVCard(card, { cardUrl: cardUrl(slug) }), {
     headers: {
       "Content-Type": "text/vcard; charset=utf-8",
-      "Content-Disposition": `inline; filename="${slug}.vcf"`,
+      // « attachment » : Android ouvre le fichier avec Contacts au lieu de l'afficher en texte ; iPhone affiche la fiche.
+      "Content-Disposition": `attachment; filename="${slug}.vcf"; filename*=UTF-8''${encodeURIComponent(card.full_name)}.vcf`,
       "Cache-Control": "no-store",
     },
   });

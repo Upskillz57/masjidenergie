@@ -123,15 +123,12 @@ export const cardUrl = (slug: string) => `${site.url}${cardPath(slug)}`;
 /** QR codes de la carte : « contact » enregistre directement la fiche, « lien » ouvre la carte en ligne. */
 export async function cardQrSvgs(card: BusinessCard) {
   const url = cardUrl(card.slug);
-  const opts = {
-    type: "svg" as const,
-    margin: 1,
-    errorCorrectionLevel: "M" as const,
-    color: { dark: "#0a3d2e", light: "#ffffff" },
-  };
+  // Marge blanche de 2 modules (le cadre blanc autour complète la zone de silence) ;
+  // correction « L » pour le contact : code moins dense, plus facile à lire sur un écran.
+  const opts = { type: "svg" as const, margin: 2, color: { dark: "#0a2e23", light: "#ffffff" } };
   const [contact, link] = await Promise.all([
-    QRCode.toString(toVCard(card, { cardUrl: url, compact: true }), opts),
-    QRCode.toString(url, opts),
+    QRCode.toString(toVCard(card, { compact: true }), { ...opts, errorCorrectionLevel: "L" }),
+    QRCode.toString(url, { ...opts, errorCorrectionLevel: "M" }),
   ]);
   return { contact, link, url };
 }
