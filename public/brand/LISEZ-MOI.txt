@@ -6,12 +6,16 @@ Versions
 - blanc       : sur fond foncé (vert du site #0a3d2e, photo sombre). Pictogramme or + texte blanc.
 - mono-blanc  : une seule couleur, blanc. Marquage, gravure, fond très chargé.
 - mono-vert   : une seule couleur, vert #0e5c47. Tampon, impression économique.
+- mono-noir   : une seule couleur, noir. Impression noir et blanc, documents administratifs.
+- mono-or     : une seule couleur, or #c8a24c. Dorure, gravure, supports haut de gamme.
 
 Formes
 - logo-horizontal : pictogramme à gauche du nom (en-têtes, signatures, papier à lettres).
 - logo-vertical   : pictogramme au-dessus du nom (affiches, kakémonos, carrés).
 - pictogramme     : le symbole seul (petits formats, filigrane).
-- icone-app       : symbole sur carré vert arrondi (photo de profil réseaux sociaux, favicon).
+- icone-app       : symbole sur carré vert arrondi (favicon, écran d'accueil).
+- badge           : icône + nom centrés sur un carré plein (vert, blanc, crème, or) :
+                    photo de profil, publication Instagram / Facebook / LinkedIn, vitrophanie.
 
 Formats
 - svg/    vectoriel, pour le web et les graphistes (texte converti en tracés).
