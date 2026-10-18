@@ -40,3 +40,6 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 !.env.example
+
+# Vidéo source non compressée (versions web dans public/videos)
+public/V1.mp4

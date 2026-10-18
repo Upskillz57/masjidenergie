@@ -21,8 +21,6 @@ export const site = {
     "Masjid Energie, une solution de YGB Développement, accompagne les mosquées de France dans leur transition énergétique grâce au photovoltaïque.",
   // Adresse publique, sans « . » ni « / » final (liens des e-mails, QR codes, sitemap).
   url: (process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000").trim().replace(/[./]+$/, ""),
-  // URL d'intégration (YouTube /embed/…, Vimeo…). Vide = bouton « Voir notre vidéo » masqué.
-  videoUrl: process.env.NEXT_PUBLIC_VIDEO_URL ?? "",
   contact: {
     person: "Aboubacar Barry",
     phone: "+33 6 01 86 95 63",

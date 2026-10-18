@@ -1,6 +1,6 @@
 import Image from "next/image";
 import type { ReactNode } from "react";
-import { VideoButton } from "@/components/home/video-button";
+import { VIDEO_HASH, VideoPlayOverlay } from "@/components/home/video-button";
 import { ArrowRight, Check, House, Leaf, Play, ShieldCheck, SunRays } from "@/components/icons";
 import { site } from "@/lib/site";
 
@@ -61,7 +61,10 @@ const stats: { icon: ReactNode; title: ReactNode; body: ReactNode; highlight?: b
 
 export function Hero() {
   return (
-    <section id="accueil" className="relative min-h-[655px] overflow-hidden bg-hero pt-[90px]">
+    <section
+      id="accueil"
+      className="relative flex min-h-[655px] flex-col overflow-hidden bg-hero pt-[90px] nav:min-h-svh"
+    >
       <Image
         src="/images/hero-mosquee-solaire.jpg"
         alt="Mosquée équipée de panneaux solaires au coucher du soleil"
@@ -79,19 +82,20 @@ export function Hero() {
         className="pointer-events-none absolute inset-0 bg-[radial-gradient(60%_50%_at_62%_30%,rgba(255,214,140,0.35),rgba(255,214,140,0)_70%)] dark:opacity-40"
       />
 
-      <div className="relative mx-auto max-w-[1536px] px-[clamp(20px,7vw,108px)]">
-        <div className="grid max-w-[620px] pt-6">
+      {/* Ordinateur : le hero occupe toute la hauteur de la fenêtre ; les espacements suivent la hauteur (vh). */}
+      <div className="relative mx-auto flex w-full max-w-[1536px] flex-1 items-center px-[clamp(20px,7vw,108px)]">
+        <div className="grid max-w-[620px] pt-6 nav:pt-[clamp(4px,2vh,24px)]">
           <p
             lang="ar"
             dir="rtl"
-            className="mb-4 justify-self-start font-arabic text-[clamp(26px,2.2vw,32px)] leading-[1.6] text-gold-dark"
+            className="mb-4 justify-self-start font-arabic text-[clamp(26px,2.2vw,32px)] leading-[1.6] text-gold-dark nav:mb-[clamp(4px,1.4vh,16px)] nav:text-[clamp(20px,3.4vh,32px)]"
           >
             بِسْمِ ٱللَّهِ ٱلرَّحْمَٰنِ ٱلرَّحِيمِ
           </p>
-          <span className="mb-5 text-[13px] font-semibold tracking-[0.26em] text-gold">
+          <span className="mb-5 text-[13px] font-semibold tracking-[0.26em] text-gold nav:mb-[clamp(8px,2vh,20px)]">
             TRANSITION ÉNERGÉTIQUE
           </span>
-          <h1 className="text-[clamp(40px,4.1vw,62px)] font-extrabold leading-[0.98] tracking-[-0.03em] text-fg">
+          <h1 className="text-[clamp(40px,4.1vw,62px)] nav:text-[clamp(32px,min(4.1vw,7.2vh),62px)] font-extrabold leading-[0.98] tracking-[-0.03em] text-fg">
             L’énergie solaire
             <br />
             <span className="text-brand-text">au</span> service des
@@ -101,12 +105,12 @@ export function Hero() {
             </span>{" "}
             <span className="text-brand-text">de France</span>
           </h1>
-          <p className="mt-[22px] max-w-[570px] text-[clamp(16px,1.2vw,18px)] leading-[1.38] text-fg">
+          <p className="mt-[22px] nav:mt-[clamp(10px,2.4vh,22px)] max-w-[570px] text-[clamp(16px,1.2vw,18px)] leading-[1.38] text-fg">
             <strong className="font-semibold">{site.name}</strong>, une solution de {site.company},
             accompagne les mosquées dans leur transition énergétique grâce au photovoltaïque. Un
             avenir plus durable, pour des lieux de culte plus autonomes.
           </p>
-          <ul className="mt-4 flex flex-wrap gap-x-5 gap-y-1.5 text-[14.5px] font-semibold text-brand-text">
+          <ul className="mt-4 nav:mt-[clamp(6px,1.6vh,16px)] flex flex-wrap gap-x-5 gap-y-1.5 text-[14.5px] font-semibold text-brand-text">
             {["Une expertise dédiée aux mosquées et lieux de culte", "Économie immédiate dès l’installation"].map(
               (t) => (
                 <li key={t} className="flex items-center gap-2">
@@ -116,7 +120,7 @@ export function Hero() {
               ),
             )}
           </ul>
-          <div className="mt-6 flex flex-wrap gap-6">
+          <div className="mt-6 flex flex-wrap gap-x-6 gap-y-3 nav:mt-[clamp(12px,2.8vh,24px)]">
             <a
               href="#etude"
               className="flex h-[55px] items-center gap-7 rounded-[10px] bg-[linear-gradient(180deg,#126a52,#0b4f3d)] px-7 text-base font-semibold text-white shadow-[0_0_0_2px_#ffffff,0_10px_24px_#0e5c4740] hover:bg-brand-hover hover:bg-none dark:shadow-[0_0_0_2px_#ffffff22,0_10px_24px_#00000055]"
@@ -130,11 +134,21 @@ export function Hero() {
               <Play className="size-[15px]" />
               Découvrir notre solution
             </a>
+            {/* Mobile et tablette : la vidéo s'ouvre depuis ce bouton (sur ordinateur, bouton au centre de l'image). */}
+            <a
+              href={VIDEO_HASH}
+              className="flex h-[53px] items-center gap-3 rounded-[10px] bg-black/45 pl-2 pr-6 text-[14.5px] font-semibold text-white backdrop-blur-sm hover:bg-black/60 nav:hidden"
+            >
+              <span className="flex size-10 items-center justify-center rounded-full bg-white text-brand">
+                <Play className="ml-0.5 size-[15px]" />
+              </span>
+              Voir la vidéo
+            </a>
           </div>
         </div>
       </div>
 
-      {site.videoUrl && <VideoButton url={site.videoUrl} />}
+      <VideoPlayOverlay />
 
       <div
         aria-hidden
@@ -161,14 +175,14 @@ export function Hero() {
       </div>
 
       <div className="relative mx-auto max-w-[1536px] px-[clamp(12px,7.2vw,111px)]">
-        <ul className="mt-[38px] grid grid-cols-1 rounded-t-xl bg-[linear-gradient(180deg,rgba(10,60,44,0.95),rgba(8,48,36,0.97))] py-[18px] text-white min-[560px]:grid-cols-2 nav:grid-cols-4">
+        <ul className="mt-[38px] nav:mt-[clamp(14px,3vh,38px)] grid grid-cols-1 rounded-t-xl bg-[linear-gradient(180deg,rgba(10,60,44,0.95),rgba(8,48,36,0.97))] py-[18px] text-white min-[560px]:grid-cols-2 nav:grid-cols-4 nav:py-[clamp(6px,1.6vh,18px)]">
           {stats.map((s, i) => (
             <li
               key={i}
               className={
                 s.highlight
-                  ? "mx-3 flex items-center gap-[clamp(12px,1.5vw,22px)] rounded-xl bg-[linear-gradient(180deg,#d6a94e,#b08431)] px-[clamp(14px,2.2vw,34px)] py-4 text-brand-deep shadow-[0_10px_28px_#00000040] ring-1 ring-white/30 nav:-my-[30px] nav:mr-[18px]"
-                  : "flex items-center gap-[clamp(14px,1.8vw,26px)] border-white/20 px-[clamp(16px,3.2vw,56px)] py-4 min-[560px]:max-[1439px]:odd:border-r nav:not-last:border-r"
+                  ? "mx-3 flex items-center gap-[clamp(12px,1.5vw,22px)] rounded-xl bg-[linear-gradient(180deg,#d6a94e,#b08431)] px-[clamp(14px,2.2vw,34px)] py-4 nav:py-[clamp(8px,1.6vh,16px)] text-brand-deep shadow-[0_10px_28px_#00000040] ring-1 ring-white/30 nav:-my-[30px] nav:mr-[18px]"
+                  : "flex items-center gap-[clamp(14px,1.8vw,26px)] border-white/20 px-[clamp(16px,3.2vw,56px)] py-4 nav:py-[clamp(6px,1.4vh,16px)] min-[560px]:max-[1439px]:odd:border-r nav:not-last:border-r"
               }
             >
               <span className={`flex-none ${s.highlight ? "text-brand-deep" : "text-gold"}`}>{s.icon}</span>
