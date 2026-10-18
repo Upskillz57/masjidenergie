@@ -1,5 +1,5 @@
 import { setCardPublished } from "@/app/actions/cards";
-import { SubmitButton } from "@/components/admin/forms";
+import { ConfirmButton, SubmitButton } from "@/components/admin/forms";
 import { CopyButton } from "@/components/cards/card-actions";
 import { cardPath, type BusinessCard } from "@/lib/cards";
 import { cardQrSvgs } from "@/lib/cards-data";
@@ -34,6 +34,26 @@ export async function QrPanel({ card, canPublish = false }: { card: BusinessCard
               <SubmitButton pendingLabel="Mise en ligne…">Remettre la carte en ligne</SubmitButton>
             </form>
           )}
+        </div>
+      )}
+
+      {card.published && canPublish && (
+        <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-line bg-bg-soft px-4 py-2.5">
+          <p className="flex items-center gap-2 text-[14px] text-fg">
+            <span className="size-2.5 rounded-full bg-brand-text" />
+            <strong className="font-semibold">Carte en ligne</strong>
+            <span className="text-muted">· page, QR codes et écran d’accueil actifs</span>
+          </p>
+          <form action={setCardPublished}>
+            <input type="hidden" name="id" value={card.id} />
+            <input type="hidden" name="published" value="off" />
+            <ConfirmButton
+              message="Mettre la carte hors ligne ? Sa page et son QR « carte en ligne » ne fonctionneront plus."
+              className="cursor-pointer text-[13px] font-medium text-muted underline underline-offset-2 hover:text-red-600"
+            >
+              Mettre hors ligne
+            </ConfirmButton>
+          </form>
         </div>
       )}
 

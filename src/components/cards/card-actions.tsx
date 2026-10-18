@@ -1,5 +1,6 @@
 "use client";
 
+import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 
 type InstallPromptEvent = Event & { prompt: () => Promise<void>; userChoice: Promise<{ outcome: string }> };
@@ -14,10 +15,11 @@ const isAppleMobile = () =>
  * Ajout de la carte à l'écran d'accueil : invite native sur Android (Chrome, Edge, Samsung Internet),
  * mode d'emploi pas à pas sur iPhone / iPad où Safari ne propose pas d'invite automatique.
  */
-export function InstallButton() {
+export function InstallButton({ appUrl, iosHelp = false }: { appUrl?: string; iosHelp?: boolean }) {
   const deferred = useRef<InstallPromptEvent | null>(null);
-  const [help, setHelp] = useState<"ios" | "android" | null>(null);
+  const [help, setHelp] = useState<"ios" | "android" | null>(iosHelp ? "ios" : null);
   const [installed, setInstalled] = useState(false);
+  const router = useRouter();
 
   useEffect(() => {
     const onPrompt = (e: Event) => {
@@ -39,6 +41,11 @@ export function InstallButton() {
       const { outcome } = await deferred.current.userChoice;
       deferred.current = null;
       if (outcome === "accepted") setInstalled(true);
+      return;
+    }
+    // iPhone : Safari installe la page affichée, on passe donc d'abord sur le mode présentation (QR en grand).
+    if (isAppleMobile() && appUrl && !location.search.includes("app=1")) {
+      router.push(`${appUrl}&ios=1`);
       return;
     }
     setHelp(isAppleMobile() ? "ios" : "android");
@@ -90,6 +97,27 @@ export function InstallButton() {
       )}
     </div>
   );
+}
+
+/** Garde l'écran allumé pendant qu'on présente le QR code (si le navigateur le permet). */
+export function KeepScreenAwake() {
+  useEffect(() => {
+    let lock: WakeLockSentinel | null = null;
+    const request = async () => {
+      try {
+        if (document.visibilityState === "visible" && "wakeLock" in navigator) lock = await navigator.wakeLock.request("screen");
+      } catch {
+        // Refusé (économie d'énergie, navigateur ancien) : l'écran se mettra en veille normalement.
+      }
+    };
+    request();
+    document.addEventListener("visibilitychange", request);
+    return () => {
+      document.removeEventListener("visibilitychange", request);
+      lock?.release().catch(() => {});
+    };
+  }, []);
+  return null;
 }
 
 export function ShareButton({ url, title }: { url: string; title: string }) {

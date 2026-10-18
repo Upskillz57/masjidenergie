@@ -10,7 +10,7 @@ const input =
 const label = "grid gap-1.5 text-[13px] font-semibold text-fg";
 const errorText = "text-[12.5px] font-medium text-red-600 dark:text-red-400";
 
-type Initial = CardFields & { id?: string; slug?: string; published?: boolean };
+type Initial = CardFields & { id?: string; slug?: string };
 
 export function CardForm({ initial, mode }: { initial: Initial; mode: "staff" | "mosque" }) {
   const [state, action, pending] = useActionState(mode === "staff" ? saveCard : saveMosqueCard, null);
@@ -118,8 +118,8 @@ export function CardForm({ initial, mode }: { initial: Initial; mode: "staff" | 
         </fieldset>
 
         {mode === "staff" && (
-          <fieldset className="grid gap-3 sm:grid-cols-2">
-            <legend className="mb-1 text-[14px] font-bold text-heading">Publication</legend>
+          <fieldset className="grid gap-3 sm:max-w-[420px]">
+            <legend className="mb-1 text-[14px] font-bold text-heading">Adresse de la carte</legend>
             <label className={label}>
               Adresse de la carte
               <span className="flex items-center rounded-lg border border-line bg-bg text-[14px] focus-within:border-brand-text focus-within:ring-2 focus-within:ring-brand-text/20">
@@ -133,17 +133,6 @@ export function CardForm({ initial, mode }: { initial: Initial; mode: "staff" | 
                   className="h-10 min-w-0 flex-1 bg-transparent pr-3 text-fg outline-none"
                 />
               </span>
-            </label>
-            <label className="flex cursor-pointer items-center gap-2.5 self-end pb-2 text-[14px] text-fg">
-              <input type="hidden" name="published" value="off" />
-              <input
-                type="checkbox"
-                name="published"
-                value="on"
-                defaultChecked={initial.published ?? true}
-                className="size-4 accent-brand"
-              />
-              Carte en ligne (accessible par QR code)
             </label>
           </fieldset>
         )}

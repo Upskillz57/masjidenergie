@@ -14,7 +14,8 @@ export async function GET(_: Request, { params }: { params: Promise<{ slug: stri
       name: `${card.full_name} · ${card.organization}`,
       short_name: card.full_name.slice(0, 24),
       description: "Carte de visite numérique",
-      start_url: path,
+      // L'icône ouvre le mode présentation : le QR « contact » en grand, prêt à être scanné.
+      start_url: `${path}?app=1`,
       scope: path,
       display: "standalone",
       background_color: color,

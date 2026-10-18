@@ -2,12 +2,13 @@ import type { Metadata, Viewport } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Suspense, type ReactNode } from "react";
-import { InstallButton, ShareButton } from "@/components/cards/card-actions";
+import { InstallButton, KeepScreenAwake, ShareButton } from "@/components/cards/card-actions";
 import { CardFace } from "@/components/cards/card-face";
-import { BRAND_META, cardIcon, cardPath, telHref, withProtocol } from "@/lib/cards";
+import { BRAND_META, cardIcon, cardPath, initials, telHref, withProtocol, type BusinessCard } from "@/lib/cards";
 import { cardQrSvgs, getPublicCard } from "@/lib/cards-data";
 
 type Params = Promise<{ slug: string }>;
+type SearchParams = Promise<Record<string, string | string[] | undefined>>;
 
 export const viewport: Viewport = { themeColor: "#0a3d2e" };
 
@@ -56,11 +57,64 @@ function Row({ icon, label, value, href, external }: { icon: string; label: stri
   );
 }
 
-async function Card({ params }: { params: Params }) {
+/**
+ * Mode présentation, ouvert depuis l'icône de l'écran d'accueil (?app=1) : le QR « contact » en grand,
+ * à faire scanner pour que la personne enregistre le contact dans son téléphone.
+ */
+function Presentation({ card, qr, url, iosHelp }: { card: BusinessCard; qr: string; url: string; iosHelp: boolean }) {
+  const meta = BRAND_META[card.brand];
+  return (
+    <div className="grid min-h-[calc(100dvh-96px)] content-center justify-items-center gap-5 text-center">
+      <KeepScreenAwake />
+      <div className="flex items-center gap-3">
+        <span
+          className="flex size-12 flex-none items-center justify-center rounded-full text-[17px] font-extrabold"
+          style={{ background: meta.themeColor, color: meta.accent }}
+        >
+          {initials(card.full_name) || "?"}
+        </span>
+        <span className="grid text-left leading-tight">
+          <span className="text-[19px] font-extrabold text-heading">{card.full_name}</span>
+          <span className="text-[14px] font-semibold text-muted">
+            {card.job_title ? `${card.job_title} · ` : ""}
+            {card.organization}
+          </span>
+        </span>
+      </div>
+
+      <div
+        className="w-[min(84vw,360px)] rounded-3xl bg-white p-4 shadow-[0_18px_50px_#0a3d2e33] [&_svg]:h-auto [&_svg]:w-full"
+        dangerouslySetInnerHTML={{ __html: qr }}
+      />
+
+      <div className="grid gap-1">
+        <p className="text-[18px] font-extrabold text-heading">Scannez pour enregistrer mon contact</p>
+        <p className="mx-auto max-w-[320px] text-[14px] text-muted">
+          Appareil photo de l’iPhone ou d’Android, puis « Ajouter aux contacts ».
+        </p>
+      </div>
+
+      <div className="grid w-full max-w-[360px] gap-2.5">
+        <ShareButton url={url} title={`${card.full_name} · ${card.organization}`} />
+        <InstallButton iosHelp={iosHelp} />
+        <Link
+          href={cardPath(card.slug)}
+          className="flex h-11 items-center justify-center rounded-xl text-[14.5px] font-semibold text-brand-text hover:underline"
+        >
+          Voir ma carte complète
+        </Link>
+      </div>
+    </div>
+  );
+}
+
+async function Card({ params, searchParams }: { params: Params; searchParams: SearchParams }) {
   const { slug } = await params;
   const card = await getPublicCard(slug);
   if (!card) notFound();
   const { contact, url } = await cardQrSvgs(card);
+  const sp = await searchParams;
+  if (sp.app === "1") return <Presentation card={card} qr={contact} url={url} iosHelp={sp.ios === "1"} />;
   const meta = BRAND_META[card.brand];
 
   return (
@@ -108,18 +162,18 @@ async function Card({ params }: { params: Params }) {
 
       <div className="mt-5 grid gap-3">
         <ShareButton url={url} title={`${card.full_name} · ${card.organization}`} />
-        <InstallButton />
+        <InstallButton appUrl={`${cardPath(slug)}?app=1`} />
       </div>
     </>
   );
 }
 
-export default function CardPage({ params }: { params: Params }) {
+export default function CardPage({ params, searchParams }: { params: Params; searchParams: SearchParams }) {
   return (
     <main className="min-h-dvh bg-bg-soft px-4 pb-10 pt-[max(24px,env(safe-area-inset-top))]">
       <div className="mx-auto max-w-[440px]">
         <Suspense fallback={<div className="h-[230px] animate-pulse rounded-[22px] bg-placeholder" />}>
-          <Card params={params} />
+          <Card params={params} searchParams={searchParams} />
         </Suspense>
         <p className="mt-8 text-center text-[12.5px] text-muted">
           Carte de visite numérique ·{" "}

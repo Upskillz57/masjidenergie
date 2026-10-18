@@ -30,8 +30,6 @@ function readFields(fd: FormData, brand: CardBrand) {
     website: text(fd, "website", 200),
     address: text(fd, "address", 200),
     note: text(fd, "note", 300),
-    // Case à cocher précédée d'un champ caché « off » : « on » présent = carte en ligne.
-    published: fd.has("published") ? fd.getAll("published").includes("on") : true,
   };
   const errors: NonNullable<CardFormState>["errors"] = {};
   if (!fields.full_name) errors.full_name = "Nom requis.";
