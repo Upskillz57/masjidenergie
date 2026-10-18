@@ -1,6 +1,6 @@
 "use server";
 
-import { updateTag } from "next/cache";
+import { refresh, updateTag } from "next/cache";
 import { redirect } from "next/navigation";
 import { requireStaff, requireUser } from "@/lib/auth";
 import { cardTag } from "@/lib/cards-data";
@@ -89,6 +89,21 @@ export async function saveCard(_: CardFormState, fd: FormData): Promise<CardForm
   if (error) return { message: "Création impossible." };
   updateTag(cardTag(slug));
   redirect(`/admin/cartes/${data.id}`);
+}
+
+/** Remet en ligne (ou retire) une carte en un clic, depuis l'admin. */
+export async function setCardPublished(fd: FormData) {
+  await requireStaff("/admin/cartes");
+  const id = text(fd, "id", 36);
+  if (!id || !isSupabaseConfigured) return;
+  const { data } = await createAdminClient()
+    .from("business_cards")
+    .update({ published: fd.get("published") === "on" })
+    .eq("id", id)
+    .select("slug")
+    .maybeSingle();
+  if (data) updateTag(cardTag(data.slug));
+  refresh();
 }
 
 export async function deleteCard(fd: FormData) {

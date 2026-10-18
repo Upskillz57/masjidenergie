@@ -33,7 +33,7 @@ export default async function EditCardPage({ params }: { params: Promise<{ id: s
       />
       <div className="grid gap-6">
         <Card title="QR codes et lien" icon="card">
-          <QrPanel card={card} />
+          <QrPanel card={card} canPublish />
         </Card>
         <Card title="Contenu de la carte" icon="file">
           <CardForm mode="staff" initial={card} />

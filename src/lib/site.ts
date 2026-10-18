@@ -1,4 +1,20 @@
+export type TeamContact = { name: string; phone?: string; whatsapp?: string };
+
+// Contacts de la section « Contact » : numéros au format français (06…, 07…).
+const team: TeamContact[] = [
+  { name: "Frère Aboubacar", phone: "06 01 86 95 63", whatsapp: "06 01 86 95 63" },
+  { name: "Frère Giovanni", whatsapp: "07 88 18 80 00" },
+  { name: "Frère Yacine", phone: "07 69 02 29 82", whatsapp: "06 21 12 39 74" },
+  { name: "Frère Brahim", phone: "06 18 85 72 43", whatsapp: "06 18 85 72 43" },
+];
+
+/** 06 12 34 56 78 → +33612345678 (liens tel: et WhatsApp). */
+const international = (n: string) => `+33${n.replace(/\D/g, "").replace(/^0/, "")}`;
+export const telLink = (n: string) => `tel:${international(n)}`;
+export const whatsappLink = (n: string) => `https://wa.me/${international(n).slice(1)}`;
+
 export const site = {
+  team,
   name: "Masjid Energie",
   company: "YGB Développement",
   description:

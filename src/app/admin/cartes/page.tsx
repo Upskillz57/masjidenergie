@@ -62,8 +62,8 @@ export default async function CardsPage({ searchParams }: { searchParams: Search
               </Link>
               <div className="flex flex-wrap items-center justify-between gap-2 px-1 text-[13px]">
                 <span className="flex items-center gap-2 text-muted">
-                  <span className={`size-2 rounded-full ${c.published ? "bg-brand-text" : "bg-zinc-400"}`} />
-                  {c.published ? "En ligne" : "Hors ligne"} · {BRAND_META[c.brand].label} · {c.scans} contact
+                  <span className={`size-2 rounded-full ${c.published ? "bg-brand-text" : "bg-gold"}`} />
+                  {c.published ? "En ligne" : <strong className="font-bold text-gold-dark">Hors ligne</strong>} · {BRAND_META[c.brand].label} · {c.scans} contact
                   {c.scans > 1 ? "s" : ""} enregistré{c.scans > 1 ? "s" : ""}
                 </span>
                 <span className="flex gap-3 font-semibold">
