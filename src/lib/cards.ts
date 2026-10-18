@@ -122,3 +122,7 @@ export function toVCard(card: CardFields, opts: { cardUrl?: string; compact?: bo
 }
 
 export const cardPath = (slug: string) => `/carte/${slug}`;
+
+/** Icône d'écran d'accueil de la carte : bleu-gris « YGB » pour YGB Développement, verte sinon. */
+export const cardIcon = (brand: CardBrand, size: 180 | 192 | 512) =>
+  `/icons/cartes/${brand === "ygb" ? "ygb" : "masjid"}-${size}.png`;

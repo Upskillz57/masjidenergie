@@ -4,7 +4,7 @@ import { notFound } from "next/navigation";
 import { Suspense, type ReactNode } from "react";
 import { InstallButton, ShareButton } from "@/components/cards/card-actions";
 import { CardFace } from "@/components/cards/card-face";
-import { BRAND_META, cardPath, telHref, withProtocol } from "@/lib/cards";
+import { BRAND_META, cardIcon, cardPath, telHref, withProtocol } from "@/lib/cards";
 import { cardQrSvgs, getPublicCard } from "@/lib/cards-data";
 
 type Params = Promise<{ slug: string }>;
@@ -21,6 +21,8 @@ export async function generateMetadata({ params }: { params: Params }): Promise<
     description: card.job_title ? `${card.job_title} · ${card.organization}` : card.organization,
     robots: { index: false, follow: false },
     manifest: `${cardPath(slug)}/manifest.webmanifest`,
+    // Icône posée sur l'écran d'accueil de l'iPhone (Android la lit dans le manifeste).
+    icons: { apple: [{ url: cardIcon(card.brand, 180), sizes: "180x180", type: "image/png" }] },
     appleWebApp: { capable: true, title: card.full_name, statusBarStyle: "black-translucent" },
     openGraph: { title, description: "Carte de visite numérique", type: "profile" },
   };

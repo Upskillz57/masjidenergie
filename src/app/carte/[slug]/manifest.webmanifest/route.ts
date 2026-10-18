@@ -1,4 +1,4 @@
-import { BRAND_META, cardPath } from "@/lib/cards";
+import { BRAND_META, cardIcon, cardPath } from "@/lib/cards";
 import { getPublicCard } from "@/lib/cards-data";
 
 // Manifeste propre à chaque carte : « Ajouter à l'écran d'accueil » ouvre directement cette carte.
@@ -21,9 +21,9 @@ export async function GET(_: Request, { params }: { params: Promise<{ slug: stri
       theme_color: color,
       lang: "fr",
       icons: [
-        { src: "/icons/icon-192.png", sizes: "192x192", type: "image/png" },
-        { src: "/icons/icon-512.png", sizes: "512x512", type: "image/png" },
-        { src: "/icon.svg", sizes: "any", type: "image/svg+xml" },
+        { src: cardIcon(card.brand, 192), sizes: "192x192", type: "image/png", purpose: "any" },
+        { src: cardIcon(card.brand, 512), sizes: "512x512", type: "image/png", purpose: "any" },
+        { src: cardIcon(card.brand, 512), sizes: "512x512", type: "image/png", purpose: "maskable" },
       ],
     },
     { headers: { "Content-Type": "application/manifest+json" } },
