@@ -31,7 +31,10 @@ export function Contact() {
         <ul className="grid gap-3.5 sm:grid-cols-2">
           {site.team.map((c) => (
             <li key={c.name} className="grid gap-3 rounded-xl border border-white/15 bg-white/[0.06] px-5 py-4">
-              <span className="text-[17px] font-bold">{c.name}</span>
+              <span className="grid gap-0.5">
+                <span className="text-[17px] font-bold">{c.name}</span>
+                <span className="text-[13.5px] font-medium text-gold">{c.role}</span>
+              </span>
               <div className="flex flex-wrap gap-2.5">
                 {c.phone && (
                   <a

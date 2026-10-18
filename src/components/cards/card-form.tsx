@@ -51,7 +51,7 @@ export function CardForm({ initial, mode }: { initial: Initial; mode: "staff" | 
           <fieldset className="grid gap-2">
             <legend className="mb-1 text-[14px] font-bold text-heading">Modèle de carte</legend>
             <div className="grid gap-2 sm:grid-cols-3">
-              {CARD_BRANDS.map((b) => (
+              {CARD_BRANDS.filter((b) => b !== "ygb" || initial.brand === "ygb").map((b) => (
                 <button
                   key={b}
                   type="button"

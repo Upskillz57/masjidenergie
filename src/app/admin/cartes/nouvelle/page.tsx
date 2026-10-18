@@ -10,7 +10,7 @@ type SearchParams = Promise<Record<string, string | string[] | undefined>>;
 export default async function NewCardPage({ searchParams }: { searchParams: SearchParams }) {
   const user = await requireStaff("/admin/cartes/nouvelle");
   const raw = (await searchParams).modele;
-  const brand = isCardBrand(raw) ? raw : "masjid";
+  const brand = isCardBrand(raw) && raw !== "ygb" ? raw : "masjid";
   const isMe = user.fullName !== user.email;
 
   return (

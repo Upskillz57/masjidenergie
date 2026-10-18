@@ -106,8 +106,7 @@ export function Hero() {
             <span className="text-brand-text">de France</span>
           </h1>
           <p className="mt-[22px] nav:mt-[clamp(10px,2.4vh,22px)] max-w-[570px] text-[clamp(16px,1.2vw,18px)] leading-[1.38] text-fg">
-            <strong className="font-semibold">{site.name}</strong>, une solution de {site.company},
-            accompagne les mosquées dans leur transition énergétique grâce au photovoltaïque. Un
+            <strong className="font-semibold">{site.name}</strong> accompagne les mosquées dans leur transition énergétique grâce au photovoltaïque. Un
             avenir plus durable, pour des lieux de culte plus autonomes.
           </p>
           <ul className="mt-4 nav:mt-[clamp(6px,1.6vh,16px)] flex flex-wrap gap-x-5 gap-y-1.5 text-[14.5px] font-semibold text-brand-text">

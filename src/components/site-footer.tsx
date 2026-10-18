@@ -12,7 +12,7 @@ export function SiteFooter() {
             <span className="font-bold">Masjid</span> Energie
           </span>
         </div>
-        <span>Une solution {site.company} · en partenariat avec SunLib</span>
+        <span>En partenariat avec SunLib</span>
         <span>
           © 2026 ·{" "}
           <Link href="/connexion" className="underline-offset-2 hover:underline">

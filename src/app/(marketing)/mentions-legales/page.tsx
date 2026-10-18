@@ -5,7 +5,7 @@ export const metadata: Metadata = {
   title: "Mentions légales",
 };
 
-// Les champs entre crochets sont à compléter avec les informations légales de YGB Développement.
+// Les champs entre crochets sont à compléter avec les informations légales de la société éditrice.
 export default function MentionsLegalesPage() {
   return (
     <div className="bg-bg-soft pt-[90px]">
@@ -16,7 +16,7 @@ export default function MentionsLegalesPage() {
 
         <h2>Éditeur du site</h2>
         <p>
-          {site.company} — [forme juridique] au capital de [montant] €<br />
+          [Raison sociale] — [forme juridique] au capital de [montant] €<br />
           Siège social : [adresse]
           <br />
           SIRET : [numéro] · RCS [ville]
@@ -37,7 +37,7 @@ export default function MentionsLegalesPage() {
 
         <h2>Propriété intellectuelle</h2>
         <p>
-          L’ensemble des contenus de ce site (textes, logos, visuels) est la propriété de {site.company},
+          L’ensemble des contenus de ce site (textes, logos, visuels) est la propriété de [raison sociale],
           sauf mention contraire. Toute reproduction sans autorisation est interdite.
         </p>
 

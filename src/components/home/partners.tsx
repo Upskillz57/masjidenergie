@@ -17,7 +17,7 @@ export function Partners() {
             PARTENAIRES · À PROPOS
           </span>
           <h2 className="text-[clamp(26px,2.1vw,32px)] font-extrabold leading-[1.1] tracking-[-0.02em] text-heading">
-            Une marque de YGB Développement, en partenariat avec{" "}
+            Une solution en partenariat avec{" "}
             <span className="text-brand-text">SunLib</span>.
           </h2>
           <p className="text-[15.5px] leading-[1.55] text-muted">

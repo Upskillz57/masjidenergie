@@ -9,7 +9,6 @@ type SearchParams = Promise<Record<string, string | string[] | undefined>>;
 const tabs = [
   { value: "", label: "Toutes" },
   { value: "masjid", label: "Masjid Energie" },
-  { value: "ygb", label: "YGB Développement" },
   { value: "mosquee", label: "Mosquées" },
 ];
 
@@ -51,7 +50,7 @@ export default async function CardsPage({ searchParams }: { searchParams: Search
 
       {cards.length === 0 ? (
         <EmptyState icon="card" title="Aucune carte pour l’instant">
-          Créez la carte de chaque membre de l’équipe, en version Masjid Energie ou YGB Développement.
+          Créez la carte de chaque membre de l’équipe, en version Masjid Energie.
         </EmptyState>
       ) : (
         <ul className="grid gap-5 md:grid-cols-2 2xl:grid-cols-3">

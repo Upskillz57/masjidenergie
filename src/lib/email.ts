@@ -65,7 +65,7 @@ ${eyebrow}<h1 style="margin:0 0 18px;font:800 23px/1.25 ${FONT};color:${C.headin
 ${body}${button}
 </td></tr>
 <tr><td style="padding:22px 32px 28px;border-top:1px solid ${C.line};font:400 12.5px/1.6 ${FONT};color:${C.muted}">
-<strong style="color:${C.green}">${escapeHtml(site.name)}</strong> · une solution ${escapeHtml(site.company)}<br>
+<strong style="color:${C.green}">${escapeHtml(site.name)}</strong><br>
 L’énergie solaire au service des mosquées de France · sans crédit, sans emprunt, sans endettement<br>
 <a href="${site.contact.phoneHref}" style="color:${C.muted};text-decoration:none">${escapeHtml(site.contact.phone)}</a> ·
 <a href="${site.url}" style="color:${C.green};text-decoration:none">${escapeHtml(site.url.replace(/^https?:\/\//, ""))}</a>

@@ -34,23 +34,6 @@ const DEMO_CARDS: BusinessCard[] = [
     updated_at: "2026-10-17T10:00:00Z",
   },
   {
-    id: "00000000-0000-4000-b000-000000000002",
-    slug: "ygb-developpement",
-    brand: "ygb",
-    full_name: site.contact.person,
-    job_title: "Gérant",
-    organization: "YGB Développement",
-    phone: null,
-    mobile: site.contact.phone,
-    email: site.contact.email,
-    website: null,
-    address: null,
-    note: null,
-    published: true,
-    scans: 7,
-    updated_at: "2026-10-16T10:00:00Z",
-  },
-  {
     id: "00000000-0000-4000-b000-000000000003",
     slug: "mosquee-errahma-strasbourg",
     brand: "mosquee",
@@ -107,7 +90,7 @@ export async function getCardById(id: string) {
 export async function getMyMosqueCard() {
   const user = await requireUser("/espace/carte");
   if (!isSupabaseConfigured || (isStaffRole(user.role) && !user.mosqueId)) {
-    return { user, card: DEMO_CARDS[2], mosque: { name: "Mosquée Errahma", address: DEMO_CARDS[2].address }, preview: true };
+    return { user, card: DEMO_CARDS[1], mosque: { name: "Mosquée Errahma", address: DEMO_CARDS[1].address }, preview: true };
   }
   if (!user.mosqueId) return { user, card: null, mosque: null, preview: false };
   const db = createAdminClient();

@@ -21,7 +21,7 @@ export function LogoMark({
   );
 }
 
-/** Logo complet du header : pictogramme + « Masjid Energie » + « YGB DÉVELOPPEMENT ». */
+/** Logo complet du header : pictogramme + « Masjid Energie » + « ÉNERGIE SOLAIRE ». */
 export function Wordmark() {
   return (
     <Link href="/#accueil" className="flex flex-none items-center gap-2" aria-label="Masjid Energie — accueil">
@@ -33,7 +33,7 @@ export function Wordmark() {
         </span>
         <span className="flex items-center gap-[7px] whitespace-nowrap font-display text-[7px] font-semibold tracking-[0.24em] text-gold sm:text-[8.5px]">
           <span className="h-px flex-1 bg-gold" />
-          YGB DÉVELOPPEMENT
+          ÉNERGIE SOLAIRE
           <span className="h-px flex-1 bg-gold" />
         </span>
       </span>
