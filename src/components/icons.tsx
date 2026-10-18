@@ -26,6 +26,23 @@ export function ChevronRight(props: IconProps) {
   );
 }
 
+export function Check(props: IconProps) {
+  return (
+    <svg viewBox="0 0 24 24" strokeWidth={2.6} {...stroke} aria-hidden {...props}>
+      <path d="m5 12.5 4.5 4.5L19 7" />
+    </svg>
+  );
+}
+
+export function ShieldCheck(props: IconProps) {
+  return (
+    <svg viewBox="0 0 24 24" {...stroke} aria-hidden {...props}>
+      <path d="M12 3 4.5 6v5.5c0 4.6 3.2 8.4 7.5 9.5 4.3-1.1 7.5-4.9 7.5-9.5V6z" />
+      <path d="m8.5 12 2.5 2.5 4.5-5" />
+    </svg>
+  );
+}
+
 export function Play(props: IconProps) {
   return (
     <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden {...props}>

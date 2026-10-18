@@ -63,11 +63,17 @@ export function SiteHeader() {
         <div className="flex-1" />
 
         <Link
-          href="/#contact"
+          href="/connexion"
+          className="mr-4 hidden flex-none whitespace-nowrap text-[13.5px] font-semibold text-brand-text hover:underline min-[1400px]:block"
+        >
+          Espace mosquée
+        </Link>
+        <a
+          href="#etude"
           className="hidden flex-none items-center gap-3.5 whitespace-nowrap rounded-[9px] bg-brand px-5 py-3.5 text-[13.5px] font-semibold text-white shadow-[0_0_0_2px_#ffffff,0_6px_16px_#0e5c4733] hover:bg-brand-hover sm:flex dark:shadow-[0_0_0_2px_#ffffff22,0_6px_16px_#00000055]"
         >
           Demander une étude <ArrowRight className="size-[15px]" />
-        </Link>
+        </a>
         <ThemeToggle />
 
         <button
@@ -106,12 +112,19 @@ export function SiteHeader() {
             </Link>
           ))}
           <Link
-            href="/#contact"
+            href="/connexion"
+            onClick={() => setOpen(false)}
+            className="border-b border-line py-3.5 text-[17px] font-medium text-brand-text"
+          >
+            Espace mosquée · connexion
+          </Link>
+          <a
+            href="#etude"
             onClick={() => setOpen(false)}
             className="my-3 flex items-center justify-center gap-3 rounded-[10px] bg-brand py-3.5 font-semibold text-white sm:hidden"
           >
             Demander une étude <ArrowRight className="size-4" />
-          </Link>
+          </a>
         </nav>
       )}
     </div>

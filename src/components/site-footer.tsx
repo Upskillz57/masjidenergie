@@ -15,6 +15,10 @@ export function SiteFooter() {
         <span>Une solution {site.company} · en partenariat avec SunLib</span>
         <span>
           © 2026 ·{" "}
+          <Link href="/connexion" className="underline-offset-2 hover:underline">
+            Espace mosquée
+          </Link>{" "}
+          ·{" "}
           <Link href="/mentions-legales" className="underline-offset-2 hover:underline">
             Mentions légales
           </Link>

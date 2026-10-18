@@ -3,7 +3,7 @@ import { ChevronRight, stepIconPaths } from "@/components/icons";
 const steps = [
   ["1. Audit énergétique", "Analyse de vos besoins et du potentiel solaire"],
   ["2. Étude de faisabilité", "Dimensionnement et projection des économies"],
-  ["3. Financement", "Montage financier adapté"],
+  ["3. Financement", "Sans crédit, sans emprunt, sans endettement"],
   ["4. Installation par nos partenaires", "Professionnels certifiés"],
   ["5. Suivi et maintenance", "Un accompagnement dans la durée"],
 ];

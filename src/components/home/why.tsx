@@ -1,11 +1,12 @@
 import type { ReactNode } from "react";
+import { Verse } from "@/components/verse";
 import { Heart, Leaf, People, Sprout } from "@/components/icons";
 
 const benefits: { icon: ReactNode; title: string; text: string }[] = [
   {
     icon: <Leaf strokeWidth={1.6} className="size-[30px]" />,
     title: "Réduisez vos coûts",
-    text: "Des économies durables sur votre facture d’électricité.",
+    text: "Une économie immédiate dès l’installation, sans crédit ni endettement.",
   },
   {
     icon: <Sprout strokeWidth={1.6} className="size-[30px]" />,
@@ -37,6 +38,11 @@ export function Why() {
             <br />
             plus durables, plus sereines
           </h2>
+          <Verse reference="14:33-34" align="start" className="mt-2 border-l-2 border-gold pl-4">
+            Et Il a assujetti pour vous le soleil et la lune, évoluant tous deux régulièrement ; et Il
+            a assujetti pour vous la nuit et le jour. Et Il vous a accordé de tout ce que vous Lui
+            avez demandé.
+          </Verse>
         </div>
         <ul className="grid gap-3.5 sm:grid-cols-2 2xl:grid-cols-4">
           {benefits.map((b, i) =>

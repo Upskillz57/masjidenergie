@@ -14,6 +14,9 @@
   --hero-bg: #f3ede2;
   --hero-fade: 255, 250, 242;
   --placeholder: #ece9e2;
+  /* Graphiques : paire vert/or validée (daltonisme, contraste) sur chaque fond */
+  --chart-grid: #16805a;
+  --chart-solar: #b8862c;
 }
 
 .dark {
@@ -28,6 +31,8 @@
   --hero-bg: #0c1714;
   --hero-fade: 12, 23, 20;
   --placeholder: #182a24;
+  --chart-grid: #36a278;
+  --chart-solar: #a67a2c;
 }
 
 @theme inline {
@@ -41,6 +46,8 @@
   --color-brand-text: var(--brand-text);
   --color-hero: var(--hero-bg);
   --color-placeholder: var(--placeholder);
+  --color-chart-grid: var(--chart-grid);
+  --color-chart-solar: var(--chart-solar);
 
   --color-brand: #0e5c47;
   --color-brand-hover: #0b4a39;
@@ -53,6 +60,7 @@
   --font-sans: var(--font-figtree);
   --font-display: var(--font-montserrat);
   --font-script: var(--font-kristi);
+  --font-arabic: var(--font-amiri);
 
   --breakpoint-nav: 1240px;
 }

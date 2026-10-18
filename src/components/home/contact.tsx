@@ -23,12 +23,20 @@ export function Contact() {
             </a>
           </p>
         </div>
-        <a
-          href={phoneHref}
-          className="flex h-[55px] items-center gap-5 rounded-[10px] bg-white px-7 text-base font-bold text-brand hover:bg-[#f3efe6]"
-        >
-          Appeler maintenant <ArrowRight className="size-[17px]" />
-        </a>
+        <div className="flex flex-wrap gap-4">
+          <a
+            href="#etude"
+            className="flex h-[55px] items-center gap-5 rounded-[10px] bg-[linear-gradient(180deg,#d6a94e,#b08431)] px-7 text-base font-bold text-brand-deep hover:brightness-105"
+          >
+            Demander une étude <ArrowRight className="size-[17px]" />
+          </a>
+          <a
+            href={phoneHref}
+            className="flex h-[55px] items-center gap-5 rounded-[10px] bg-white px-7 text-base font-bold text-brand hover:bg-[#f3efe6]"
+          >
+            Appeler maintenant <ArrowRight className="size-[17px]" />
+          </a>
+        </div>
       </div>
     </section>
   );

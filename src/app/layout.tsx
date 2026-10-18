@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Figtree, Kristi, Montserrat } from "next/font/google";
+import { Amiri, Figtree, Kristi, Montserrat } from "next/font/google";
 import { site } from "@/lib/site";
 import "./globals.css";
 
@@ -20,6 +20,12 @@ const kristi = Kristi({
   weight: "400",
 });
 
+const amiri = Amiri({
+  variable: "--font-amiri",
+  subsets: ["arabic"],
+  weight: "400",
+});
+
 export const metadata: Metadata = {
   metadataBase: new URL(site.url),
   title: {
@@ -31,7 +37,7 @@ export const metadata: Metadata = {
     type: "website",
     locale: "fr_FR",
     siteName: site.name,
-    images: ["/images/hero.jpg"],
+    images: ["/images/hero-mosquee-solaire.jpg"],
   },
 };
 
@@ -43,7 +49,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
     <html
       lang="fr"
       suppressHydrationWarning
-      className={`${figtree.variable} ${montserrat.variable} ${kristi.variable} h-full antialiased`}
+      className={`${figtree.variable} ${montserrat.variable} ${kristi.variable} ${amiri.variable} h-full antialiased`}
     >
       <head>
         <script dangerouslySetInnerHTML={{ __html: themeScript }} />

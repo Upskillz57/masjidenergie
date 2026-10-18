@@ -1,12 +1,12 @@
 import Image from "next/image";
 import type { ReactNode } from "react";
 import { VideoButton } from "@/components/home/video-button";
-import { ArrowRight, House, Leaf, People, Play, SunRays } from "@/components/icons";
+import { ArrowRight, Check, House, Leaf, Play, ShieldCheck, SunRays } from "@/components/icons";
 import { site } from "@/lib/site";
 
 const big = "text-[26px] font-extrabold leading-[1.15] tracking-[-0.01em] text-accent";
 
-const stats: { icon: ReactNode; title: ReactNode; body: ReactNode }[] = [
+const stats: { icon: ReactNode; title: ReactNode; body: ReactNode; highlight?: boolean }[] = [
   {
     icon: <Leaf strokeWidth={1.5} className="size-[42px]" />,
     title: "Réduction des coûts",
@@ -46,15 +46,16 @@ const stats: { icon: ReactNode; title: ReactNode; body: ReactNode }[] = [
     ),
   },
   {
-    icon: <People strokeWidth={1.5} className="h-[46px] w-[62px]" />,
-    title: "Une expertise dédiée",
+    icon: <ShieldCheck strokeWidth={1.5} className="size-[46px]" />,
+    title: <span className="whitespace-nowrap text-[clamp(20px,1.7vw,24px)] font-extrabold leading-none tracking-[-0.01em]">Sans crédit</span>,
     body: (
-      <span className="mt-1 text-sm leading-[1.3] text-on-brand">
-        Spécialiste des mosquées
+      <span className="mt-1 whitespace-nowrap text-[14.5px] font-semibold leading-[1.3]">
+        Sans emprunt,
         <br />
-        et lieux de culte
+        sans endettement
       </span>
     ),
+    highlight: true,
   },
 ];
 
@@ -62,7 +63,7 @@ export function Hero() {
   return (
     <section id="accueil" className="relative min-h-[655px] overflow-hidden bg-hero pt-[90px]">
       <Image
-        src="/images/hero.jpg"
+        src="/images/hero-mosquee-solaire.jpg"
         alt="Mosquée équipée de panneaux solaires au coucher du soleil"
         fill
         preload
@@ -79,7 +80,14 @@ export function Hero() {
       />
 
       <div className="relative mx-auto max-w-[1536px] px-[clamp(20px,7vw,108px)]">
-        <div className="grid max-w-[620px] pt-10">
+        <div className="grid max-w-[620px] pt-6">
+          <p
+            lang="ar"
+            dir="rtl"
+            className="mb-4 justify-self-start font-arabic text-[clamp(26px,2.2vw,32px)] leading-[1.6] text-gold-dark"
+          >
+            بِسْمِ ٱللَّهِ ٱلرَّحْمَٰنِ ٱلرَّحِيمِ
+          </p>
           <span className="mb-5 text-[13px] font-semibold tracking-[0.26em] text-gold">
             TRANSITION ÉNERGÉTIQUE
           </span>
@@ -98,9 +106,19 @@ export function Hero() {
             accompagne les mosquées dans leur transition énergétique grâce au photovoltaïque. Un
             avenir plus durable, pour des lieux de culte plus autonomes.
           </p>
+          <ul className="mt-4 flex flex-wrap gap-x-5 gap-y-1.5 text-[14.5px] font-semibold text-brand-text">
+            {["Une expertise dédiée aux mosquées et lieux de culte", "Économie immédiate dès l’installation"].map(
+              (t) => (
+                <li key={t} className="flex items-center gap-2">
+                  <Check className="size-4 flex-none text-gold" />
+                  {t}
+                </li>
+              ),
+            )}
+          </ul>
           <div className="mt-6 flex flex-wrap gap-6">
             <a
-              href="#contact"
+              href="#etude"
               className="flex h-[55px] items-center gap-7 rounded-[10px] bg-[linear-gradient(180deg,#126a52,#0b4f3d)] px-7 text-base font-semibold text-white shadow-[0_0_0_2px_#ffffff,0_10px_24px_#0e5c4740] hover:bg-brand-hover hover:bg-none dark:shadow-[0_0_0_2px_#ffffff22,0_10px_24px_#00000055]"
             >
               Demander une étude gratuite <ArrowRight className="size-[17px]" />
@@ -120,14 +138,12 @@ export function Hero() {
 
       <div
         aria-hidden
-        className="pointer-events-none absolute right-[clamp(90px,6vw,100px)] top-[150px] hidden -rotate-[14deg] text-right font-script text-[clamp(34px,3vw,46px)] leading-[1.05] text-[#1d2a26] nav:block"
+        className="pointer-events-none absolute right-[clamp(80px,5.5vw,110px)] top-[170px] hidden -rotate-[6deg] text-right font-script text-[clamp(36px,2.7vw,50px)] leading-[1.2] tracking-[0.06em] whitespace-nowrap text-brand nav:block"
       >
-        Des mosquées
-        <br />
-        plus vertes
+        Des mosquées plus vertes
         <br />
         pour demain
-        <svg viewBox="0 0 200 20" className="-mt-1 ml-auto block w-[150px]">
+        <svg viewBox="0 0 200 20" className="mt-1 ml-auto block w-[220px]">
           <path d="M4 16C60 6 130 2 196 4" fill="none" stroke="#c8a24c" strokeWidth="2.5" strokeLinecap="round" />
         </svg>
       </div>
@@ -145,13 +161,17 @@ export function Hero() {
       </div>
 
       <div className="relative mx-auto max-w-[1536px] px-[clamp(12px,7.2vw,111px)]">
-        <ul className="mt-[38px] grid grid-cols-1 rounded-t-xl bg-[linear-gradient(180deg,rgba(10,60,44,0.95),rgba(8,48,36,0.97))] py-[18px] text-white min-[560px]:grid-cols-2 min-[960px]:grid-cols-4">
+        <ul className="mt-[38px] grid grid-cols-1 rounded-t-xl bg-[linear-gradient(180deg,rgba(10,60,44,0.95),rgba(8,48,36,0.97))] py-[18px] text-white min-[560px]:grid-cols-2 nav:grid-cols-4">
           {stats.map((s, i) => (
             <li
               key={i}
-              className="flex items-center gap-[26px] border-white/20 px-[clamp(20px,3.5vw,56px)] py-4 min-[560px]:max-[959px]:odd:border-r min-[960px]:not-last:border-r"
+              className={
+                s.highlight
+                  ? "mx-3 flex items-center gap-[clamp(12px,1.5vw,22px)] rounded-xl bg-[linear-gradient(180deg,#d6a94e,#b08431)] px-[clamp(14px,2.2vw,34px)] py-4 text-brand-deep shadow-[0_10px_28px_#00000040] ring-1 ring-white/30 nav:-my-[30px] nav:mr-[18px]"
+                  : "flex items-center gap-[clamp(14px,1.8vw,26px)] border-white/20 px-[clamp(16px,3.2vw,56px)] py-4 min-[560px]:max-[1239px]:odd:border-r nav:not-last:border-r"
+              }
             >
-              <span className="flex-none text-gold">{s.icon}</span>
+              <span className={`flex-none ${s.highlight ? "text-brand-deep" : "text-gold"}`}>{s.icon}</span>
               <div className="grid gap-0.5">
                 <span className="text-[15.5px] font-bold leading-[1.25]">{s.title}</span>
                 {s.body}
