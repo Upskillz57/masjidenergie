@@ -16,6 +16,7 @@ const items = (counts?: { newRequests: number; pendingAccounts: number }, isAdmi
   { href: "/admin/demandes", label: "Demandes d’étude", icon: <Icon name="inbox" />, badge: counts?.newRequests },
   { href: "/admin/comptes", label: "Comptes mosquées", icon: <Icon name="userPlus" />, badge: counts?.pendingAccounts },
   { href: "/admin/cartes", label: "Cartes de visite", icon: <Icon name="card" /> },
+  { href: "/admin/documents", label: "Documents utiles", icon: <Icon name="file" /> },
   ...(isAdmin ? [{ href: "/admin/equipe", label: "Équipe", icon: <Icon name="users" /> }] : []),
   { href: "/espace", label: "Aperçu espace mosquée", icon: <Icon name="gauge" /> },
 ];

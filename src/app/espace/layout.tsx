@@ -14,6 +14,7 @@ const items: NavItem[] = [
   { href: "/espace/consommation", label: "Consommation", icon: <Icon name="bolt" /> },
   { href: "/espace/factures", label: "Factures", icon: <Icon name="file" /> },
   { href: "/espace/projet", label: "Mon projet solaire", icon: <Icon name="sun" /> },
+  { href: "/espace/documents", label: "Documents", icon: <Icon name="folder" /> },
   { href: "/espace/carte", label: "Carte de visite", icon: <Icon name="card" /> },
 ];
 
