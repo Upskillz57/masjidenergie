@@ -21,7 +21,7 @@ export function LogoMark({
   );
 }
 
-/** Logo complet du header : pictogramme + « Masjid Energie » + « ÉNERGIE SOLAIRE ». */
+/** Logo complet du header : pictogramme + « Masjid Energie » + « by SunLib » (police arrondie de SunLib, en or). */
 export function Wordmark() {
   return (
     <Link href="/#accueil" className="flex flex-none items-center gap-2" aria-label="Masjid Energie — accueil">
@@ -31,9 +31,9 @@ export function Wordmark() {
         <span className="whitespace-nowrap font-display text-[22px] leading-none tracking-[-0.02em] text-brand-text sm:text-[30px]">
           <span className="font-bold">Masjid</span> <span className="font-normal">Energie</span>
         </span>
-        <span className="flex items-center gap-[7px] whitespace-nowrap font-display text-[7px] font-semibold tracking-[0.24em] text-gold sm:text-[8.5px]">
+        <span className="flex items-center gap-[7px] whitespace-nowrap font-sunlib text-[10px] font-semibold leading-none text-gold sm:text-[13px]">
           <span className="h-px flex-1 bg-gold" />
-          ÉNERGIE SOLAIRE
+          by SunLib
           <span className="h-px flex-1 bg-gold" />
         </span>
       </span>

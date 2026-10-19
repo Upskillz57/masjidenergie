@@ -1,6 +1,5 @@
 import Link from "next/link";
 import { LogoMark } from "@/components/logo";
-import { site } from "@/lib/site";
 
 export function SiteFooter() {
   return (

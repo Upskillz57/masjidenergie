@@ -28,7 +28,7 @@ Formats
 Couleurs
 - Vert Masjid Energie : #0e5c47   (vert profond #0a3d2e)
 - Or                  : #c8a24c   (or clair #e3c97a)
-- Police              : Montserrat (Bold / Regular, sous-titre SemiBold)
+- Police              : Montserrat (Bold / Regular) ; mention « by SunLib » en MuseoModerno SemiBold
 
 Règles : ne pas déformer, ne pas changer les couleurs, garder de l'espace libre autour
 (au moins la hauteur du croissant de lune).

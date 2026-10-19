@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Amiri, Figtree, Kristi, Montserrat } from "next/font/google";
+import { Amiri, Figtree, Kristi, Montserrat, MuseoModerno } from "next/font/google";
 import { site } from "@/lib/site";
 import "./globals.css";
 
@@ -26,6 +26,13 @@ const amiri = Amiri({
   weight: "400",
 });
 
+// Police arrondie proche du logo SunLib, pour la mention « by SunLib » du logo.
+const sunlib = MuseoModerno({
+  variable: "--font-museo",
+  subsets: ["latin"],
+  weight: "600",
+});
+
 export const metadata: Metadata = {
   metadataBase: new URL(site.url),
   title: {
@@ -49,7 +56,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
     <html
       lang="fr"
       suppressHydrationWarning
-      className={`${figtree.variable} ${montserrat.variable} ${kristi.variable} ${amiri.variable} h-full antialiased`}
+      className={`${figtree.variable} ${montserrat.variable} ${kristi.variable} ${amiri.variable} ${sunlib.variable} h-full antialiased`}
     >
       <head>
         <script dangerouslySetInnerHTML={{ __html: themeScript }} />
