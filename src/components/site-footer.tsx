@@ -11,7 +11,7 @@ export function SiteFooter() {
             <span className="font-bold">Masjid</span> Energie
           </span>
         </div>
-        <span>En partenariat avec SunLib</span>
+        <span>En partenariat avec Nelissol · soutien financier SunLib</span>
         <span>
           © 2026 ·{" "}
           <Link href="/connexion" className="underline-offset-2 hover:underline">
