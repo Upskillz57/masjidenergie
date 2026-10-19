@@ -24,6 +24,17 @@ export function Partners() {
             SunLib, pionnier de l’abonnement solaire, finance et supervise les installations. Masjid
             Energie accompagne chaque mosquée de l’audit au suivi long terme.
           </p>
+          {/* Logo blanc détouré : posé sur le vert du site pour rester lisible en mode clair comme en mode sombre. */}
+          <div className="mt-3 flex flex-wrap items-center gap-x-6 gap-y-3 justify-self-start rounded-2xl bg-brand-deep px-6 py-4 shadow-[0_10px_28px_#0a3d2e33] ring-1 ring-white/10">
+            <span className="text-[11.5px] font-semibold uppercase leading-tight tracking-[0.2em] text-gold">
+              Partenaire
+              <br />
+              officiel
+            </span>
+            <span aria-hidden className="h-10 w-px bg-white/20" />
+            {/* eslint-disable-next-line @next/next/no-img-element -- logo vectoriel statique */}
+            <img src="/images/partenaires/sunlib-blanc.svg" alt="SunLib" width={168} height={60} className="h-[54px] w-auto" />
+          </div>
         </div>
         <dl className="grid grid-cols-2 gap-3.5">
           {figures.map((f) => (
