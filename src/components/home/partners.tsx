@@ -17,12 +17,11 @@ export function Partners() {
             PARTENAIRES · À PROPOS
           </span>
           <h2 className="text-[clamp(26px,2.1vw,32px)] font-extrabold leading-[1.1] tracking-[-0.02em] text-heading">
-            Une solution en partenariat avec{" "}
-            <span className="text-brand-text">Nelissol</span>.
+            Une solution soutenue par{" "}
+            <span className="text-brand-text">SunLib</span>.
           </h2>
           <p className="text-[15.5px] leading-[1.55] text-muted">
-            Nelissol, notre partenaire énergie, est aux côtés de Masjid Energie sur chaque projet solaire. Les
-            installations bénéficient du soutien financier du fonds d’investissement SunLib, pionnier de
+            Les installations bénéficient du soutien financier du fonds d’investissement SunLib, pionnier de
             l’abonnement solaire : c’est ce qui permet aux mosquées de s’équiper sans crédit, sans emprunt et
             sans endettement. Masjid Energie accompagne chaque mosquée de l’audit au suivi long terme.
           </p>
