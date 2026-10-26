@@ -2,10 +2,9 @@ export type TeamContact = { name: string; role: string; phone?: string; whatsapp
 
 // Contacts de la section « Contact » : numéros au format français (06…, 07…).
 const team: TeamContact[] = [
-  { name: "Frère Aboubacar", role: "Responsable développement", phone: "06 01 86 95 63", whatsapp: "06 01 86 95 63" },
+  { name: "Frère Boubacar", role: "Responsable développement", phone: "06 01 86 95 63", whatsapp: "06 01 86 95 63" },
+  { name: "Frère Yassine", role: "Responsable développement", phone: "07 69 02 29 82", whatsapp: "06 21 12 39 74" },
   { name: "Frère Giovanni", role: "Responsable développement", whatsapp: "07 88 18 80 00" },
-  { name: "Frère Yacine", role: "Responsable développement", phone: "07 69 02 29 82", whatsapp: "06 21 12 39 74" },
-  { name: "Frère Brahim", role: "Responsable technique", phone: "06 18 85 72 43", whatsapp: "06 18 85 72 43" },
 ];
 
 /** 06 12 34 56 78 → +33612345678 (liens tel: et WhatsApp). */

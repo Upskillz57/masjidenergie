@@ -2,6 +2,7 @@ import { Contact } from "@/components/home/contact";
 import { Hero } from "@/components/home/hero";
 import { Partners } from "@/components/home/partners";
 import { Realisations } from "@/components/home/realisations";
+import { Sadaqa } from "@/components/home/sadaqa";
 import { Steps } from "@/components/home/steps";
 import { Why } from "@/components/home/why";
 import { Verse } from "@/components/verse";
@@ -17,6 +18,7 @@ export default function HomePage() {
       </section>
       <Steps />
       <Why />
+      <Sadaqa />
       <Realisations />
       <Partners />
       <Contact />
