@@ -3,6 +3,7 @@
 import { refresh } from "next/cache";
 import { inviteUser } from "@/lib/admin/invite";
 import { requireAdmin, requireStaff } from "@/lib/auth";
+import { isFileKind } from "@/lib/dossier";
 import { createAdminClient, DOCUMENTS_BUCKET, isSupabaseConfigured } from "@/lib/supabase/server";
 import { isRequestStatus, isStaffRole, ROLES, type Role } from "@/lib/workflow";
 
@@ -83,7 +84,8 @@ export async function uploadRequestFiles(formData: FormData) {
   const user = await requireStaff();
   if (!isSupabaseConfigured) return;
   const requestId = id(formData);
-  const kind = formData.get("kind") === "facture" ? "facture" : "document";
+  const rawKind = formData.get("kind");
+  const kind = isFileKind(rawKind) ? rawKind : "document";
   const files = formData.getAll("files").filter((f): f is File => f instanceof File && f.size > 0);
   const db = createAdminClient();
 

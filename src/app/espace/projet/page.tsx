@@ -1,6 +1,9 @@
 import Link from "next/link";
 import { Card, EmptyState, Icon, PageHeader, StatusBadge } from "@/components/dashboard/ui";
-import { getMyRequests } from "@/lib/espace/data";
+import { DossierChecklist, ProjectContextForm } from "@/components/dossier/dossier";
+import { PieceUpload } from "@/components/dossier/piece-upload";
+import { dossierPieces, REQUIRED_BILLS } from "@/lib/dossier";
+import { getMyDossier, getMyRequests } from "@/lib/espace/data";
 import { site } from "@/lib/site";
 import { formatDate, type RequestStatus } from "@/lib/workflow";
 
@@ -15,6 +18,18 @@ const steps: { title: string; text: string; reached: RequestStatus[] }[] = [
 export default async function ProjectPage() {
   const { requests } = await getMyRequests();
   const current = requests[0];
+  const dossier = current ? await getMyDossier(current) : null;
+  const count = (kind: string) => dossier?.files.filter((f) => f.kind === kind).length ?? 0;
+  const pieces =
+    current &&
+    dossierPieces({
+      bills: count("facture"),
+      enedisFiles: count("enedis"),
+      roofFiles: count("toiture"),
+      linkySigned: Boolean(dossier?.linkySigned),
+      motivations: current.project_motivations,
+      context: current.project_context,
+    });
 
   return (
     <>
@@ -29,6 +44,7 @@ export default async function ProjectPage() {
         </EmptyState>
       ) : (
         <div className="grid items-start gap-6 xl:grid-cols-[minmax(0,1fr)_340px]">
+          <div className="grid min-w-0 gap-6">
           <Card title={`${current.mosque_name} · demande n°${current.number}`} icon="sun" actions={<StatusBadge status={current.status} />}>
             {current.status === "sans_suite" ? (
               <p className="text-[14.5px] text-fg">Ce projet n’a pas été poursuivi. Contactez-nous si votre situation a changé.</p>
@@ -62,6 +78,26 @@ export default async function ProjectPage() {
               </ol>
             )}
           </Card>
+
+          {pieces && (
+            <Card title="Votre dossier" icon="folder">
+              <DossierChecklist pieces={pieces} />
+              <div className="mt-5 grid gap-3 border-t border-line pt-5">
+                {!dossier?.linkySigned && (
+                  <Link href="/espace/documents/linky" className="inline-flex h-10 items-center justify-center rounded-lg bg-brand px-4 text-[14px] font-semibold text-white hover:bg-brand-hover">
+                    Signer l’autorisation Enedis en ligne
+                  </Link>
+                )}
+                <PieceUpload requestId={current.id} kind="facture" label={`Ajouter des factures (${count("facture")} / ${REQUIRED_BILLS})`} />
+                <PieceUpload requestId={current.id} kind="enedis" label="Joindre une autorisation Enedis déjà signée" />
+                <PieceUpload requestId={current.id} kind="toiture" label="Ajouter une vue aérienne de la toiture" />
+              </div>
+              <div className="mt-5 border-t border-line pt-5">
+                <ProjectContextForm requestId={current.id} motivations={current.project_motivations} context={current.project_context} />
+              </div>
+            </Card>
+          )}
+          </div>
 
           <div className="grid gap-6">
             <Card title="Votre demande" icon="file">

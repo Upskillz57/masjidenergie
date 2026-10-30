@@ -2,6 +2,8 @@ import "server-only";
 
 import { demoAccountRequests, demoGetRequest, demoListRequests, demoTeam } from "@/lib/admin/demo";
 import { requireAdmin, requireStaff } from "@/lib/auth";
+import type { FileKind } from "@/lib/dossier";
+import { findSignedLinky } from "@/lib/dossier-data";
 import { createAdminClient, DOCUMENTS_BUCKET, isSupabaseConfigured } from "@/lib/supabase/server";
 import {
   isRequestStatus,
@@ -74,7 +76,7 @@ export type RequestFile = {
   name: string;
   size: number;
   mime: string | null;
-  kind: "facture" | "document";
+  kind: FileKind;
   created_at: string;
   url: string | null;
 };
@@ -115,7 +117,11 @@ export async function getRequest(id: string) {
     request: req.data as Omit<RequestRow, "assignee" | "request_files"> & {
       mosque_osm: string | null;
       message: string | null;
+      project_motivations: string[];
+      project_context: string | null;
+      mosque_id: string | null;
     },
+    linky: await findSignedLinky(db, req.data),
     files: (files.data ?? []).map((f) => ({ ...f, url: urlByPath.get(f.path) ?? null })) as RequestFile[],
     comments: (comments.data ?? []) as unknown as {
       id: string;

@@ -1,6 +1,7 @@
 import "server-only";
 
 import { requireUser } from "@/lib/auth";
+import { findSignedLinky, getDossierFiles, type DossierFile } from "@/lib/dossier-data";
 import { createAdminClient, isSupabaseConfigured } from "@/lib/supabase/server";
 import type { RequestStatus } from "@/lib/workflow";
 
@@ -74,27 +75,55 @@ export const invoices: Invoice[] = [...energyMonths].reverse().map((m, i) => {
   };
 });
 
-export type MyRequest = { id: string; number: number; created_at: string; status: RequestStatus; mosque_name: string };
+export type MyRequest = {
+  id: string;
+  number: number;
+  created_at: string;
+  status: RequestStatus;
+  mosque_name: string;
+  mosque_id: string | null;
+  email: string;
+  project_motivations: string[];
+  project_context: string | null;
+};
 
 /** Demandes d'étude de la mosquée connectée (par mosquée rattachée, sinon par e-mail). */
 export async function getMyRequests() {
   const user = await requireUser("/espace/projet");
   if (!isSupabaseConfigured) {
     const requests: MyRequest[] = [
-      { id: "demo", number: 104, created_at: "2026-02-03T10:00:00Z", status: "installee", mosque_name: "Votre mosquée" },
+      {
+        id: "demo",
+        number: 104,
+        created_at: "2026-02-03T10:00:00Z",
+        status: "installee",
+        mosque_name: "Votre mosquée",
+        mosque_id: null,
+        email: user.email,
+        project_motivations: [],
+        project_context: null,
+      },
     ];
     return { user, requests };
   }
   const db = createAdminClient();
   let query = db
     .from("study_requests")
-    .select("id, number, created_at, status, mosque_name")
+    .select("id, number, created_at, status, mosque_name, mosque_id, email, project_motivations, project_context")
     .order("created_at", { ascending: false });
   query = user.mosqueId
     ? query.or(`mosque_id.eq.${user.mosqueId},email.ilike.${user.email}`)
     : query.ilike("email", user.email);
   const { data } = await query.returns<MyRequest[]>();
   return { user, requests: data ?? [] };
+}
+
+/** Pièces déjà déposées pour le dossier de cette demande. */
+export async function getMyDossier(request: MyRequest): Promise<{ files: DossierFile[]; linkySigned: boolean }> {
+  if (!isSupabaseConfigured) return { files: [], linkySigned: false };
+  const db = createAdminClient();
+  const [files, linky] = await Promise.all([getDossierFiles(db, request.id), findSignedLinky(db, request)]);
+  return { files, linkySigned: Boolean(linky) };
 }
 
 export const kwh = (n: number) => `${new Intl.NumberFormat("fr-FR").format(Math.round(n))} kWh`;

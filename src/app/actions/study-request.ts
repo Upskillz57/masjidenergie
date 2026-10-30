@@ -1,16 +1,15 @@
 "use server";
 
+import { dossierPieces, isMotivation, missingPieces, MOTIVATIONS, REQUIRED_BILLS, type Motivation } from "@/lib/dossier";
+import { declaredFilesError, parseDeclaredFiles, registerUploads, signUploads } from "@/lib/dossier-data";
 import { emailLayout, emailTable, sendEmail, teamInbox } from "@/lib/email";
 import { site } from "@/lib/site";
-import { BILL_ACCEPT, MAX_BILLS, MAX_BILLS_BYTES, type StudyRequestState } from "@/lib/study";
-import { createAdminClient, DOCUMENTS_BUCKET, isSupabaseConfigured } from "@/lib/supabase/server";
+import { type StudyRequestState } from "@/lib/study";
+import { createAdminClient, isSupabaseConfigured } from "@/lib/supabase/server";
 
 const text = (fd: FormData, key: string) => String(fd.get(key) ?? "").trim().slice(0, 300);
 
 const thanks = "Merci, votre demande a bien été envoyée. Nous vous recontactons très vite.";
-
-const safeName = (name: string) =>
-  name.normalize("NFD").replace(/[̀-ͯ]/g, "").replace(/[^\w.-]+/g, "_").slice(-80) || "fichier";
 
 export async function submitStudyRequest(formData: FormData): Promise<StudyRequestState> {
   // Champ piège invisible : seuls les robots le remplissent.
@@ -25,9 +24,11 @@ export async function submitStudyRequest(formData: FormData): Promise<StudyReque
     phone: text(formData, "phone"),
     email: text(formData, "email").toLowerCase(),
     chargers: formData.get("chargers") === "oui",
+    motivations: formData.getAll("motivations").filter(isMotivation) as Motivation[],
+    context: String(formData.get("context") ?? "").trim().slice(0, 2000),
     message: String(formData.get("message") ?? "").trim().slice(0, 2000),
   };
-  const bills = formData.getAll("bills").filter((f): f is File => f instanceof File && f.size > 0);
+  const files = parseDeclaredFiles(formData.get("files"));
 
   const errors: StudyRequestState["errors"] = {};
   if (!data.mosqueName) errors.mosque = "Sélectionnez ou indiquez votre mosquée.";
@@ -35,16 +36,28 @@ export async function submitStudyRequest(formData: FormData): Promise<StudyReque
   if (!data.lastName) errors.lastName = "Nom requis.";
   if (data.phone.replace(/\D/g, "").length < 9) errors.phone = "Numéro de téléphone invalide.";
   if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(data.email)) errors.email = "Adresse e-mail invalide.";
-  if (bills.length > MAX_BILLS) errors.bills = `${MAX_BILLS} fichiers maximum.`;
-  else if (bills.reduce((n, f) => n + f.size, 0) > MAX_BILLS_BYTES) errors.bills = "4 Mo maximum au total.";
-  else if (bills.some((f) => !BILL_ACCEPT.split(",").includes(f.type)))
-    errors.bills = "Formats acceptés : PDF, JPG, PNG.";
+  if (!data.motivations.length && !data.context) errors.motivation = "Indiquez votre motivation ou le contexte du projet.";
+  const filesError = files ? declaredFilesError(files) : "Fichiers invalides.";
+  if (filesError) errors.bills = filesError;
   if (Object.keys(errors).length) return { ok: false, message: "Merci de vérifier le formulaire.", errors };
+
+  const declared = files ?? [];
+  const count = (kind: string) => declared.filter((f) => f.kind === kind).length;
+  const pieces = dossierPieces({
+    bills: count("facture"),
+    enedisFiles: count("enedis"),
+    roofFiles: count("toiture"),
+    linkySigned: false,
+    motivations: data.motivations,
+    context: data.context || null,
+  });
+  const missing = missingPieces(pieces).map((p) => p.label);
 
   const osm = /^(node|way|relation)\/\d+$/.test(data.mosqueOsm) ? data.mosqueOsm : null;
 
-  // 1. Enregistrement dans l'espace admin (demande + factures).
+  // 1. Enregistrement dans l'espace admin. Les fichiers sont ensuite envoyés directement au stockage.
   let saved: { id: string; number: number } | null = null;
+  let uploads: StudyRequestState["uploads"];
   if (isSupabaseConfigured) {
     const db = createAdminClient();
     const { data: row, error } = await db
@@ -58,6 +71,8 @@ export async function submitStudyRequest(formData: FormData): Promise<StudyReque
         phone: data.phone,
         email: data.email,
         chargers: data.chargers,
+        project_motivations: data.motivations,
+        project_context: data.context || null,
         message: data.message || null,
       })
       .select("id, number")
@@ -65,20 +80,12 @@ export async function submitStudyRequest(formData: FormData): Promise<StudyReque
     if (error) console.error("[demande d'étude] insertion impossible", error);
     else {
       saved = row;
-      for (const f of bills) {
-        const path = `demandes/${row.id}/${crypto.randomUUID()}-${safeName(f.name)}`;
-        const up = await db.storage.from(DOCUMENTS_BUCKET).upload(path, f, { contentType: f.type });
-        if (up.error) {
-          console.error("[demande d'étude] envoi de facture impossible", up.error);
-          continue;
-        }
-        await db.from("request_files").insert({ request_id: row.id, path, name: f.name, size: f.size, mime: f.type });
-      }
-      await db.from("request_events").insert({ request_id: row.id, type: "created", data: { bills: bills.length } });
+      uploads = await signUploads(db, row.id, declared);
+      await db.from("request_events").insert({ request_id: row.id, type: "created", data: {} });
     }
   }
 
-  // 2. Notification de l'équipe. Sans base, les factures partent en pièces jointes.
+  // 2. Notification de l'équipe.
   const rows: [string, string][] = [
     ["Mosquée", data.mosqueName],
     ["Adresse", data.mosqueAddress || "—"],
@@ -86,7 +93,11 @@ export async function submitStudyRequest(formData: FormData): Promise<StudyReque
     ["Téléphone", data.phone],
     ["E-mail", data.email],
     ["Bornes de recharge", data.chargers ? "Oui, souhaitées" : "Non"],
-    ["Factures", bills.length ? bills.map((f) => f.name).join(", ") : "Aucune"],
+    ["Motivation", data.motivations.map((m) => MOTIVATIONS[m]).join(", ") || "—"],
+    ["Contexte", data.context || "—"],
+    ["Factures annoncées", `${count("facture")} / ${REQUIRED_BILLS}`],
+    ["Autorisation Enedis", count("enedis") ? "Jointe" : "À obtenir"],
+    ["Vue aérienne", count("toiture") ? "Jointe" : "Non fournie"],
   ];
   if (data.message) rows.push(["Message", data.message]);
 
@@ -100,18 +111,19 @@ export async function submitStudyRequest(formData: FormData): Promise<StudyReque
       saved ? { label: "Ouvrir la demande dans l’espace admin", href: `${site.url}/admin/demandes/${saved.id}` } : undefined,
       {
         eyebrow: saved ? `Demande n°${saved.number}` : "Demande d’étude",
-        preheader: `${data.firstName} ${data.lastName} · ${data.phone}${bills.length ? ` · ${bills.length} facture(s)` : ""}`,
+        preheader: `${data.firstName} ${data.lastName} · ${data.phone} · ${count("facture")} facture(s)`,
       },
     ),
-    attachments: saved
-      ? undefined
-      : await Promise.all(
-          bills.map(async (f) => ({ filename: f.name, content: Buffer.from(await f.arrayBuffer()).toString("base64") })),
-        ),
   });
 
   if (!saved && !sent) {
     return { ok: false, message: `L’envoi a échoué. Réessayez ou appelez-nous au ${site.contact.phone}.` };
   }
-  return { ok: true, message: thanks };
+  return { ok: true, message: thanks, requestId: saved?.id, uploads, missing };
+}
+
+/** Appelée après l'envoi direct des fichiers : l'identifiant de la demande n'est connu que de son auteur. */
+export async function completeStudyRequest(requestId: string) {
+  if (!isSupabaseConfigured || !/^[0-9a-f-]{36}$/i.test(requestId)) return;
+  await registerUploads(createAdminClient(), requestId, null);
 }

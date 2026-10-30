@@ -9,8 +9,10 @@ import {
   uploadRequestFiles,
 } from "@/app/actions/admin";
 import { AutoSubmitSelect, ConfirmButton, SubmitButton } from "@/components/admin/forms";
+import { DossierChecklist, ProjectContextForm } from "@/components/dossier/dossier";
 import { Card, ghostButtonClass, Icon, inputClass, StatusBadge } from "@/components/dashboard/ui";
 import { getRequest } from "@/lib/admin/data";
+import { dossierPieces, FILE_KIND_LABEL, FILE_KINDS, missingPieces } from "@/lib/dossier";
 import {
   formatDate,
   formatDateTime,
@@ -34,6 +36,8 @@ function eventLabel(type: string, data: Record<string, string | number | null | 
       return data.to ? `Assignée à ${data.to}` : "Assignation retirée";
     case "files":
       return `Documents ajoutés : ${data.names}`;
+    case "context":
+      return "Contexte du projet mis à jour";
     case "file_deleted":
       return `Document supprimé : ${data.name}`;
     default:
@@ -48,7 +52,19 @@ export default async function RequestDetailPage({ params }: { params: Promise<{ 
   const { id } = await params;
   const detail = await getRequest(id);
   if (!detail) notFound();
-  const { request: r, files, comments, events, staff, user } = detail;
+  const { request: r, files, comments, events, staff, user, linky } = detail;
+  const pieces = dossierPieces({
+    bills: files.filter((f) => f.kind === "facture").length,
+    enedisFiles: files.filter((f) => f.kind === "enedis").length,
+    roofFiles: files.filter((f) => f.kind === "toiture").length,
+    linkySigned: Boolean(linky),
+    motivations: r.project_motivations,
+    context: r.project_context,
+  });
+  const missing = missingPieces(pieces);
+  const reminder = `mailto:${r.email}?subject=${encodeURIComponent(`Votre dossier d’étude n°${r.number} : pièces à compléter`)}&body=${encodeURIComponent(
+    `Assalamou alaykoum ${r.first_name},\n\nPour réaliser l’étude de ${r.mosque_name}, il nous manque encore :\n${missing.map((p) => `- ${p.label}${p.detail ? ` (reçues : ${p.detail})` : ""}`).join("\n")}\n\nBien à vous,\nL’équipe Masjid Energie`,
+  )}`;
 
   const mapQuery = encodeURIComponent(`${r.mosque_name} ${r.mosque_address ?? ""}`);
   const images = files.filter((f) => f.mime?.startsWith("image/") && f.url);
@@ -133,8 +149,35 @@ export default async function RequestDetailPage({ params }: { params: Promise<{ 
             )}
           </Card>
 
+          <Card
+            title="Dossier de la mosquée"
+            icon="folder"
+            actions={
+              missing.length > 0 && (
+                <a href={reminder} className={`${ghostButtonClass} h-8 px-3 text-[13px]`}>
+                  <Icon name="mail" className="size-4" /> Réclamer les pièces
+                </a>
+              )
+            }
+          >
+            <DossierChecklist pieces={pieces} />
+            {linky && (
+              <a
+                href={`/documents/formulaires/${linky.id}?voir=1`}
+                target="_blank"
+                rel="noreferrer"
+                className="mt-3 inline-flex items-center gap-1 text-[13.5px] font-medium text-brand-text hover:underline"
+              >
+                Voir l’autorisation signée en ligne <Icon name="external" className="size-3.5" />
+              </a>
+            )}
+            <div className="mt-5 border-t border-line pt-5">
+              <ProjectContextForm requestId={r.id} motivations={r.project_motivations} context={r.project_context} />
+            </div>
+          </Card>
+
           <Card title={`Factures et documents (${files.length})`} icon="clip">
-            {files.length === 0 && <p className="mb-4 text-[14px] text-muted">Aucune facture envoyée avec la demande.</p>}
+            {files.length === 0 && <p className="mb-4 text-[14px] text-muted">Aucun fichier envoyé avec la demande.</p>}
 
             {images.length > 0 && (
               <ul className="mb-4 grid grid-cols-[repeat(auto-fill,minmax(150px,1fr))] gap-3">
@@ -151,7 +194,7 @@ export default async function RequestDetailPage({ params }: { params: Promise<{ 
                     <div className="flex items-center justify-between gap-2 border-t border-line bg-card px-2.5 py-2">
                       <span className="grid min-w-0 text-[12px] leading-tight">
                         <span className="truncate font-medium text-fg">{f.name}</span>
-                        <span className="text-muted">{formatSize(f.size)}</span>
+                        <span className="text-muted">{FILE_KIND_LABEL[f.kind]} · {formatSize(f.size)}</span>
                       </span>
                       <form action={deleteRequestFile}>
                         <input type="hidden" name="id" value={f.id} />
@@ -175,7 +218,7 @@ export default async function RequestDetailPage({ params }: { params: Promise<{ 
                     <span className="grid min-w-0 flex-1 text-[13.5px] leading-tight">
                       <span className="truncate font-medium text-fg">{f.name}</span>
                       <span className="text-muted">
-                        {f.kind === "facture" ? "Facture" : "Document"} · {formatSize(f.size)}
+                        {FILE_KIND_LABEL[f.kind]} · {formatSize(f.size)}
                       </span>
                     </span>
                     {f.url && (
@@ -209,8 +252,11 @@ export default async function RequestDetailPage({ params }: { params: Promise<{ 
                 className="min-w-0 flex-1 text-[13.5px] text-muted file:mr-3 file:cursor-pointer file:rounded-md file:border-0 file:bg-brand/10 file:px-3 file:py-1.5 file:text-[13px] file:font-semibold file:text-brand-text"
               />
               <select name="kind" defaultValue="document" aria-label="Type de document" className={`${inputClass} w-auto cursor-pointer`}>
-                <option value="document">Document (étude, devis, photo…)</option>
-                <option value="facture">Facture</option>
+                {FILE_KINDS.map((k) => (
+                  <option key={k} value={k}>
+                    {k === "document" ? "Document (étude, devis, photo…)" : FILE_KIND_LABEL[k]}
+                  </option>
+                ))}
               </select>
               <SubmitButton pendingLabel="Envoi…">Ajouter</SubmitButton>
             </form>

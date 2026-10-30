@@ -38,7 +38,13 @@ const seed: [string, string, string, string, RequestStatus, boolean, number, num
 
 const isoDaysAgo = (d: number, h = 10) => new Date(Date.UTC(2026, 9, 17 - d, h, 15)).toISOString();
 
-const requests: (RequestRow & { mosque_osm: string | null; message: string | null })[] = seed.map(
+const requests: (RequestRow & {
+  mosque_osm: string | null;
+  message: string | null;
+  project_motivations: string[];
+  project_context: string | null;
+  mosque_id: string | null;
+})[] = seed.map(
   ([mosque, address, first, last, status, chargers, files, days], i) => {
     const assignee = status === "nouvelle" ? null : staff[(i % 2) + 1];
     return {
@@ -59,6 +65,9 @@ const requests: (RequestRow & { mosque_osm: string | null; message: string | nul
         i % 2 === 0
           ? "Notre salle de prière est chauffée à l’électricité, la facture a beaucoup augmenté cet hiver. Le toit fait environ 300 m²."
           : null,
+      project_motivations: i % 2 === 0 ? ["economie", "hausse"] : [],
+      project_context: null,
+      mosque_id: null,
       assigned_to: assignee?.id ?? null,
       assignee,
       request_files: [{ count: files }],
@@ -108,6 +117,7 @@ export function demoGetRequest(id: string) {
     user: DEMO_USER,
     request,
     files,
+    linky: null,
     comments:
       request.status === "nouvelle"
         ? []
