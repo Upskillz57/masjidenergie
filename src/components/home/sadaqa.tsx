@@ -1,5 +1,5 @@
 import type { ReactNode } from "react";
-import { Droplet, Leaf, Sun } from "@/components/icons";
+import { Heart, Leaf, Sun } from "@/components/icons";
 
 const steps: { icon: ReactNode; title: string; text: string }[] = [
   {
@@ -13,9 +13,9 @@ const steps: { icon: ReactNode; title: string; text: string }[] = [
     text: "Moins de dépenses d’électricité, plus de moyens pour la vie de la mosquée.",
   },
   {
-    icon: <Droplet strokeWidth={1.6} className="size-[28px]" />,
-    title: "Des puits pour les plus démunis",
-    text: "Une partie de chaque abonnement finance la construction de puits.",
+    icon: <Heart strokeWidth={1.6} className="size-[28px]" />,
+    title: "Des actions pour la communauté",
+    text: "Une partie de chaque abonnement finance des actions envers la communauté.",
   },
 ];
 
@@ -32,11 +32,11 @@ export function Sadaqa() {
           <p className="text-[15.5px] leading-[1.55] text-muted">
             En équipant votre mosquée de panneaux solaires, vous profitez de la lumière du soleil, une énergie
             propre et renouvelable, et vous allégez durablement vos factures. Et ce n’est pas tout : une partie de
-            chaque abonnement est reversée à la construction de puits pour les plus démunis.
+            chaque abonnement est reversée à des actions envers la communauté.
           </p>
           <p className="mt-2 justify-self-start rounded-xl bg-brand px-5 py-4 text-[15px] font-semibold leading-[1.45] text-white shadow-[0_8px_20px_#0e5c4730]">
             Pour chaque abonnement, une <span className="text-gold">sadaqa jariya</span> : les mosquées et leurs
-            fidèles investissent pour l’éternel !
+            fidèles investissent pour l’éternité !
           </p>
           <figure className="mt-2 grid gap-1.5 border-l-2 border-gold pl-4">
             <blockquote className="text-[14.5px] italic leading-[1.5] text-fg">

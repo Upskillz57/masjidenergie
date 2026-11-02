@@ -3,14 +3,14 @@ import { ArrowRight, PlugZap, Thermometer } from "@/components/icons";
 
 const services: { icon: ReactNode; title: string; text: string }[] = [
   {
-    icon: <PlugZap strokeWidth={1.6} className="size-[38px]" />,
-    title: "Bornes de recharge",
-    text: "Fidèles et riverains rechargent leur véhicule sur le parking de la mosquée : chaque recharge payante peut lui rapporter un revenu.",
-  },
-  {
     icon: <Thermometer strokeWidth={1.6} className="size-[38px]" />,
     title: "Pompes à chaleur",
-    text: "Un chauffage performant qui allège la facture : l’argent qui n’est plus dépensé reste disponible pour la vie de la mosquée.",
+    text: "Un chauffage performant, moins dépendant du gaz\u00a0: l’argent qui n’est plus dépensé reste disponible pour la vie de la mosquée.",
+  },
+  {
+    icon: <PlugZap strokeWidth={1.6} className="size-[38px]" />,
+    title: "Bornes de recharge",
+    text: "Fidèles et riverains rechargent leur véhicule sur le parking de la mosquée\u00a0: chaque recharge payante peut lui rapporter un revenu.",
   },
 ];
 
@@ -18,11 +18,12 @@ export function Services() {
   return (
     <section id="services" className="scroll-mt-[90px] bg-[linear-gradient(180deg,#0a3c2c,#083024)] text-white">
       <div className="mx-auto grid max-w-[1536px] gap-8 px-[clamp(20px,4.7vw,72px)] py-14">
-        <div className="grid max-w-[900px] gap-3">
+        <div className="grid max-w-[1200px] gap-3">
           <span className="text-[13px] font-semibold tracking-[0.26em] text-gold">NOUS INSTALLONS AUSSI</span>
           <h2 className="text-[clamp(30px,3.4vw,50px)] font-extrabold leading-[1.05] tracking-[-0.02em]">
-            Pompes à chaleur et bornes de recharge&nbsp;:{" "}
-            <span className="text-gold">une source de revenus</span> pour les mosquées
+            Pompes à chaleur&nbsp;: <span className="text-gold">réduisez votre facture de gaz</span>
+            <br />
+            Bornes de recharge&nbsp;: <span className="text-gold">une source de revenus</span>
           </h2>
         </div>
         <ul className="grid gap-4 md:grid-cols-2">

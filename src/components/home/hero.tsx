@@ -117,7 +117,7 @@ export function Hero() {
               Pompes à chaleur et bornes de recharge
             </span>
             <span className="text-[14.5px] font-semibold leading-[1.3]">
-              Une source de revenus possible pour votre mosquée
+              Moins de gaz à payer et de nouveaux revenus pour votre mosquée
             </span>
           </a>
           <ul className="mt-4 nav:mt-[clamp(6px,1.6vh,16px)] flex flex-wrap gap-x-5 gap-y-1.5 text-[14.5px] font-semibold text-brand-text">
