@@ -114,10 +114,10 @@ export function Hero() {
             className="mt-4 grid justify-self-start gap-0.5 rounded-xl bg-[linear-gradient(180deg,#d6a94e,#b08431)] px-5 py-3 text-brand-deep shadow-[0_10px_24px_#00000030] hover:brightness-105 nav:mt-[clamp(8px,1.6vh,16px)] nav:py-[clamp(6px,1.2vh,12px)]"
           >
             <span className="text-[clamp(18px,1.6vw,23px)] font-extrabold leading-[1.15] tracking-[-0.01em]">
-              Pompes à chaleur et bornes de recharge
+              Pompe à chaleur et borne de recharge
             </span>
             <span className="text-[14.5px] font-semibold leading-[1.3]">
-              Moins de gaz à payer et de nouveaux revenus pour votre mosquée
+              Supprimez vos factures de gaz et diversifiez vos revenus grâce aux bornes
             </span>
           </a>
           <ul className="mt-4 nav:mt-[clamp(6px,1.6vh,16px)] flex flex-wrap gap-x-5 gap-y-1.5 text-[14.5px] font-semibold text-brand-text">

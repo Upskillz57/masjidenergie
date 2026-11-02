@@ -21,9 +21,10 @@ export function Services() {
         <div className="grid max-w-[1200px] gap-3">
           <span className="text-[13px] font-semibold tracking-[0.26em] text-gold">NOUS INSTALLONS AUSSI</span>
           <h2 className="text-[clamp(30px,3.4vw,50px)] font-extrabold leading-[1.05] tracking-[-0.02em]">
-            Pompes à chaleur&nbsp;: <span className="text-gold">réduisez votre facture de gaz</span>
+            Pompe à chaleur et borne de recharge&nbsp;:
             <br />
-            Bornes de recharge&nbsp;: <span className="text-gold">une source de revenus</span>
+            <span className="text-gold">supprimez vos factures de gaz</span> et{" "}
+            <span className="text-gold">diversifiez vos revenus</span> grâce aux bornes
           </h2>
         </div>
         <ul className="grid gap-4 md:grid-cols-2">
