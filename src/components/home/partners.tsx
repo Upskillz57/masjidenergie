@@ -7,13 +7,13 @@ const figures = [
 
 export function Partners() {
   return (
-    <section id="partenaires" className="bg-bg">
+    <section id="partenaires" className="bg-bg-tint">
       <div
         id="a-propos"
         className="mx-auto grid max-w-[1536px] items-center gap-8 px-[clamp(20px,4.7vw,72px)] py-14 lg:grid-cols-2"
       >
         <div className="grid gap-3">
-          <span className="text-[13px] font-semibold tracking-[0.26em] text-gold">
+          <span className="text-[13px] font-semibold tracking-[0.26em] text-[#8a6620] dark:text-gold">
             PARTENAIRES · À PROPOS
           </span>
           <h2 className="text-[clamp(26px,2.1vw,32px)] font-extrabold leading-[1.1] tracking-[-0.02em] text-heading">
@@ -41,7 +41,7 @@ export function Partners() {
           <span className="text-[13px] font-semibold text-muted">Le fonds SunLib en chiffres</span>
           <dl className="grid grid-cols-2 gap-3.5">
             {figures.map((f) => (
-              <div key={f.label} className="flex flex-col-reverse rounded-lg border border-line bg-card p-5">
+              <div key={f.label} className="flex flex-col-reverse rounded-lg border border-line bg-card p-5 dark:bg-bg">
                 <dt className="text-[13px] text-muted">{f.label}</dt>
                 <dd className={`text-[30px] font-extrabold ${f.gold ? "text-gold-dark dark:text-gold" : "text-brand-text"}`}>
                   {f.value}

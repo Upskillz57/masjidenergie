@@ -10,7 +10,7 @@ const steps = [
 
 export function Steps() {
   return (
-    <section id="accompagnement" className="bg-[linear-gradient(180deg,var(--bg),var(--bg-soft))]">
+    <section id="accompagnement" className="bg-bg-tint">
       <div className="mx-auto grid max-w-[1536px] gap-[26px] px-[clamp(20px,8.3vw,128px)] py-[34px]">
         <div className="grid justify-items-center gap-1 text-center">
           <h2 className="text-2xl font-bold tracking-[-0.01em] text-fg">Notre accompagnement</h2>
@@ -20,7 +20,7 @@ export function Steps() {
           {steps.map(([title, text], i) => (
             <li key={title} className="flex items-start gap-2 pr-3">
               <div className="grid flex-1 gap-3">
-                <span className="ml-1 flex size-[60px] items-center justify-center rounded-full border border-line bg-card text-brand-text shadow-[0_4px_16px_#00000014]">
+                <span className="ml-1 flex size-[60px] items-center justify-center rounded-full border border-line bg-card text-brand-text dark:bg-bg shadow-[0_4px_16px_#00000014]">
                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.9} strokeLinecap="round" strokeLinejoin="round" className="size-7" aria-hidden>
                     <path d={stepIconPaths[i]} />
                   </svg>

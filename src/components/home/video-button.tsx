@@ -6,9 +6,9 @@ import { Play } from "@/components/icons";
 export const VIDEO_HASH = "#video";
 
 const SOURCES = {
-  desktop: "/videos/masjid-energie-1080.mp4",
-  mobile: "/videos/masjid-energie-720.mp4",
-  poster: "/videos/masjid-energie-poster.jpg",
+  desktop: "/videos/V1ok.mp4",
+  mobile: "/videos/V1ok-720.mp4",
+  poster: "/videos/V1ok-poster.jpg",
 };
 
 /** Bouton rond « lecture » posé au centre de l'image du hero (ordinateur). */

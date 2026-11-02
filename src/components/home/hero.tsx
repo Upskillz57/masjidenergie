@@ -95,7 +95,7 @@ export function Hero() {
           <span className="mb-5 text-[13px] font-semibold tracking-[0.26em] text-gold nav:mb-[clamp(8px,2vh,20px)]">
             TRANSITION ÉNERGÉTIQUE
           </span>
-          <h1 className="text-[clamp(40px,4.1vw,62px)] nav:text-[clamp(32px,min(4.1vw,7.2vh),62px)] font-extrabold leading-[0.98] tracking-[-0.03em] text-fg">
+          <h1 className="text-[clamp(40px,4.1vw,62px)] nav:text-[clamp(32px,min(4.1vw,6.4vh),62px)] font-extrabold leading-[0.98] tracking-[-0.03em] text-fg">
             L’énergie solaire
             <br />
             <span className="text-brand-text">au</span> service des
@@ -109,6 +109,17 @@ export function Hero() {
             <strong className="font-semibold">{site.name}</strong> accompagne les mosquées dans leur transition énergétique grâce au photovoltaïque. Un
             avenir plus durable, pour des lieux de culte plus autonomes.
           </p>
+          <a
+            href="#services"
+            className="mt-4 grid justify-self-start gap-0.5 rounded-xl bg-[linear-gradient(180deg,#d6a94e,#b08431)] px-5 py-3 text-brand-deep shadow-[0_10px_24px_#00000030] hover:brightness-105 nav:mt-[clamp(8px,1.6vh,16px)] nav:py-[clamp(6px,1.2vh,12px)]"
+          >
+            <span className="text-[clamp(18px,1.6vw,23px)] font-extrabold leading-[1.15] tracking-[-0.01em]">
+              Pompes à chaleur et bornes de recharge
+            </span>
+            <span className="text-[14.5px] font-semibold leading-[1.3]">
+              Une source de revenus possible pour votre mosquée
+            </span>
+          </a>
           <ul className="mt-4 nav:mt-[clamp(6px,1.6vh,16px)] flex flex-wrap gap-x-5 gap-y-1.5 text-[14.5px] font-semibold text-brand-text">
             {["Une expertise dédiée aux mosquées et lieux de culte", "Économie immédiate dès l’installation"].map(
               (t) => (

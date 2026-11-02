@@ -24,7 +24,7 @@ export function Sadaqa() {
     <section id="sadaqa" className="bg-bg">
       <div className="mx-auto grid max-w-[1536px] items-center gap-8 px-[clamp(20px,4.7vw,72px)] py-14 lg:grid-cols-2">
         <div className="grid gap-3">
-          <span className="text-[13px] font-semibold tracking-[0.26em] text-gold">ÉCONOMIE ET SADAQA</span>
+          <span className="text-[13px] font-semibold tracking-[0.26em] text-gold-dark dark:text-gold">ÉCONOMIE ET SADAQA</span>
           <h2 className="text-[clamp(26px,2.1vw,32px)] font-extrabold leading-[1.1] tracking-[-0.02em] text-heading">
             Masjid Energie : <span className="text-brand-text">Économie</span> et{" "}
             <span className="text-gold-dark dark:text-gold">Sadaqa</span> !

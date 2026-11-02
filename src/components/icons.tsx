@@ -102,6 +102,23 @@ export function SunRays(props: IconProps) {
   );
 }
 
+export function Thermometer(props: IconProps) {
+  return (
+    <svg viewBox="0 0 24 24" {...stroke} aria-hidden {...props}>
+      <path d="M14 4v10.54a4 4 0 1 1-4 0V4a2 2 0 0 1 4 0Z" />
+    </svg>
+  );
+}
+
+export function PlugZap(props: IconProps) {
+  return (
+    <svg viewBox="0 0 24 24" {...stroke} aria-hidden {...props}>
+      <path d="M6.3 20.3a2.4 2.4 0 0 0 3.4 0L12 18l-6-6-2.3 2.3a2.4 2.4 0 0 0 0 3.4Z" />
+      <path d="m2 22 3-3M7.5 13.5 10 11M10.5 16.5 13 14M18 3l-4 4h6l-4 4" />
+    </svg>
+  );
+}
+
 export function House(props: IconProps) {
   return (
     <svg viewBox="0 0 24 24" {...stroke} aria-hidden {...props}>
@@ -147,16 +164,6 @@ export function Droplet(props: IconProps) {
   return (
     <svg viewBox="0 0 24 24" {...stroke} aria-hidden {...props}>
       <path d="M12 22a7 7 0 0 0 7-7c0-2-1-3.9-3-5.5s-3.5-4-4-6.5c-.5 2.5-2 4.9-4 6.5C6 11.1 5 13 5 15a7 7 0 0 0 7 7z" />
-    </svg>
-  );
-}
-
-export function Photo(props: IconProps) {
-  return (
-    <svg viewBox="0 0 24 24" {...stroke} aria-hidden {...props}>
-      <rect x="3" y="3" width="18" height="18" rx="2" />
-      <circle cx="9" cy="9" r="2" />
-      <path d="m21 15-3.1-3.1a2 2 0 0 0-2.8 0L6 21" />
     </svg>
   );
 }

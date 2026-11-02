@@ -5,6 +5,7 @@
 :root {
   --bg: #ffffff;
   --bg-soft: #fbfaf7;
+  --bg-tint: #e6f3ec;
   --card: #ffffff;
   --fg: #1d2a26;
   --muted: #55605c;
@@ -22,6 +23,7 @@
 .dark {
   --bg: #0c1714;
   --bg-soft: #0f1d19;
+  --bg-tint: #13291f;
   --card: #13231e;
   --fg: #e8efec;
   --muted: #a3b2ac;
@@ -38,6 +40,7 @@
 @theme inline {
   --color-bg: var(--bg);
   --color-bg-soft: var(--bg-soft);
+  --color-bg-tint: var(--bg-tint);
   --color-card: var(--card);
   --color-fg: var(--fg);
   --color-muted: var(--muted);
