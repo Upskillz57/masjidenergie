@@ -89,7 +89,7 @@ export function demoListRequests(filters: { status?: string; q?: string; mine?: 
   );
   const counts = {} as Record<RequestStatus, number>;
   for (const r of requests) counts[r.status] = (counts[r.status] ?? 0) + 1;
-  return { rows, counts, total: requests.length, user: DEMO_USER };
+  return { rows, counts, total: requests.length, user: DEMO_USER, staff };
 }
 
 const demoBill = (label: string, amount: string) =>

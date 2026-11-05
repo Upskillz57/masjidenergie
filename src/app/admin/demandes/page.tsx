@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { StatusSelect } from "@/components/admin/forms";
+import { AssigneeSelect, StatusSelect } from "@/components/admin/forms";
 import { ShareButton } from "@/components/admin/share-dialog";
 import { AccountBadge, Card, EmptyState, Icon, inputClass, PageHeader, Stat } from "@/components/dashboard/ui";
 import { listRequests } from "@/lib/admin/data";
@@ -16,7 +16,7 @@ export default async function RequestsPage({ searchParams }: { searchParams: Sea
   const q = one(sp.q);
   const mine = one(sp.moi) === "1";
   const chargers = one(sp.bornes) === "1";
-  const { rows, counts, total } = await listRequests({ status, q, mine, chargers });
+  const { rows, counts, total, staff } = await listRequests({ status, q, mine, chargers });
 
   const href = (next: Record<string, string>) => {
     const all: Record<string, string> = { statut: status, q, moi: mine ? "1" : "", bornes: chargers ? "1" : "", ...next };
@@ -180,8 +180,8 @@ export default async function RequestsPage({ searchParams }: { searchParams: Sea
                       </span>
                     </td>
                     <td className="whitespace-nowrap text-[13.5px] text-muted md:px-3 md:py-3.5">{formatDate(r.created_at)}</td>
-                    <td className="text-[13.5px] text-muted md:px-3 md:py-3.5">
-                      {r.assignee ? r.assignee.full_name || r.assignee.email : <span className="italic">Non assignée</span>}
+                    <td className="md:px-3 md:py-3.5">
+                      <AssigneeSelect id={r.id} assignee={r.assigned_to} staff={staff} />
                     </td>
                     <td className="md:px-3 md:py-3.5">
                       <StatusSelect id={r.id} status={r.status} />

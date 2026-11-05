@@ -4,6 +4,7 @@ import { useActionState, useState, type ReactNode } from "react";
 import { useFormStatus } from "react-dom";
 import {
   approveAccountRequest,
+  assignRequest,
   inviteRequesterToCreateAccount,
   inviteTeamMember,
   updateRequestStatus,
@@ -96,6 +97,69 @@ function StatusSelectField({ status }: { status: RequestStatus }) {
         viewBox="0 0 24 24"
         aria-hidden="true"
         className="pointer-events-none absolute right-2 top-1/2 size-3.5 -translate-y-1/2 opacity-70"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="2.2"
+      >
+        <path d="m6 9 6 6 6-6" />
+      </svg>
+    </span>
+  );
+}
+
+/** Assignation modifiable directement depuis la liste des demandes. */
+export function AssigneeSelect({
+  id,
+  assignee,
+  staff,
+}: {
+  id: string;
+  assignee: string | null;
+  staff: { id: string; full_name: string | null; email: string }[];
+}) {
+  return (
+    <form action={assignRequest} className="relative z-10 inline-flex max-w-full">
+      <input type="hidden" name="id" value={id} />
+      <AssigneeSelectField assignee={assignee ?? ""} staff={staff} />
+    </form>
+  );
+}
+
+function AssigneeSelectField({
+  assignee,
+  staff,
+}: {
+  assignee: string;
+  staff: { id: string; full_name: string | null; email: string }[];
+}) {
+  const { pending } = useFormStatus();
+  const [value, setValue] = useState(assignee);
+  return (
+    <span className="relative inline-flex max-w-full">
+      <select
+        name="assignee"
+        value={value}
+        aria-label="Changer la personne assignée"
+        disabled={pending}
+        onChange={(e) => {
+          setValue(e.currentTarget.value);
+          e.currentTarget.form?.requestSubmit();
+        }}
+        className={`h-8 max-w-[170px] cursor-pointer appearance-none truncate rounded-lg border border-line bg-card py-0 pl-2.5 pr-7 text-[13px] outline-none hover:border-brand-text/40 focus-visible:ring-2 focus-visible:ring-brand-text/40 disabled:opacity-60 ${
+          value ? "font-medium text-fg" : "italic text-muted"
+        }`}
+      >
+        <option value="">Non assignée</option>
+        {staff.map((s) => (
+          <option key={s.id} value={s.id}>
+            {s.full_name || s.email}
+          </option>
+        ))}
+      </select>
+      <svg
+        viewBox="0 0 24 24"
+        aria-hidden="true"
+        className="pointer-events-none absolute right-2 top-1/2 size-3.5 -translate-y-1/2 text-muted"
         fill="none"
         stroke="currentColor"
         strokeWidth="2.2"

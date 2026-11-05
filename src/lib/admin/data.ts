@@ -96,11 +96,12 @@ export async function listRequests(filters: RequestFilters) {
   for (const r of all ?? []) if (isRequestStatus(r.status)) counts[r.status]++;
 
   const ids = (rows ?? []).map((r) => r.id);
-  const [account, { data: studies }] = await Promise.all([
+  const [account, { data: studies }, { data: staff }] = await Promise.all([
     accountStates(db, rows ?? []),
     ids.length
       ? db.from("request_files").select("request_id").in("request_id", ids).like("path", "demandes/%/etude/%")
       : Promise.resolve({ data: [] as { request_id: string }[] }),
+    db.from("profiles").select("id, full_name, email, role").in("role", ["admin", "equipe", "technique"]).order("full_name"),
   ]);
   const studyCount = new Map<string, number>();
   for (const f of studies ?? []) studyCount.set(f.request_id, (studyCount.get(f.request_id) ?? 0) + 1);
@@ -109,6 +110,7 @@ export async function listRequests(filters: RequestFilters) {
     counts,
     total: all?.length ?? 0,
     user,
+    staff: (staff ?? []) as { id: string; full_name: string | null; email: string; role: Role }[],
   };
 }
 
