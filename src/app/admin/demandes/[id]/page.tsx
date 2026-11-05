@@ -4,11 +4,12 @@ import {
   addComment,
   assignRequest,
   deleteComment,
-  deleteRequestFile,
   updateRequestStatus,
   uploadRequestFiles,
 } from "@/app/actions/admin";
 import { AutoSubmitSelect, ConfirmButton, SubmitButton } from "@/components/admin/forms";
+import { RequestFiles } from "@/components/admin/request-files";
+import { ShareButton } from "@/components/admin/share-dialog";
 import { DossierChecklist, ProjectContextForm } from "@/components/dossier/dossier";
 import { Card, ghostButtonClass, Icon, inputClass, StatusBadge } from "@/components/dashboard/ui";
 import { getRequest } from "@/lib/admin/data";
@@ -16,7 +17,6 @@ import { dossierPieces, FILE_KIND_LABEL, FILE_KINDS, missingPieces } from "@/lib
 import {
   formatDate,
   formatDateTime,
-  formatSize,
   isRequestStatus,
   REQUEST_STATUSES,
   ROLE_LABEL,
@@ -40,13 +40,12 @@ function eventLabel(type: string, data: Record<string, string | number | null | 
       return "Contexte du projet mis à jour";
     case "file_deleted":
       return `Document supprimé : ${data.name}`;
+    case "shared":
+      return `Partagée par e-mail à ${data.to}${Number(data.files) ? ` (${data.files} pièce${Number(data.files) > 1 ? "s" : ""} jointe${Number(data.files) > 1 ? "s" : ""})` : ""}`;
     default:
       return type;
   }
 }
-
-const deleteIconClass =
-  "flex size-8 cursor-pointer items-center justify-center rounded-md text-muted hover:bg-red-50 hover:text-red-600 dark:hover:bg-red-400/10";
 
 export default async function RequestDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
@@ -67,8 +66,6 @@ export default async function RequestDetailPage({ params }: { params: Promise<{ 
   )}`;
 
   const mapQuery = encodeURIComponent(`${r.mosque_name} ${r.mosque_address ?? ""}`);
-  const images = files.filter((f) => f.mime?.startsWith("image/") && f.url);
-  const others = files.filter((f) => !images.includes(f));
 
   return (
     <>
@@ -96,6 +93,9 @@ export default async function RequestDetailPage({ params }: { params: Promise<{ 
             </span>
           )}
           <StatusBadge status={r.status} />
+          <ShareButton requestId={r.id} className={`${ghostButtonClass} h-9 px-3 text-[13.5px]`}>
+            <Icon name="share" className="size-4" /> Partager
+          </ShareButton>
         </div>
       </div>
 
@@ -177,65 +177,7 @@ export default async function RequestDetailPage({ params }: { params: Promise<{ 
           </Card>
 
           <Card title={`Factures et documents (${files.length})`} icon="clip">
-            {files.length === 0 && <p className="mb-4 text-[14px] text-muted">Aucun fichier envoyé avec la demande.</p>}
-
-            {images.length > 0 && (
-              <ul className="mb-4 grid grid-cols-[repeat(auto-fill,minmax(150px,1fr))] gap-3">
-                {images.map((f) => (
-                  <li key={f.id} className="group overflow-hidden rounded-lg border border-line bg-bg-soft">
-                    <a href={f.url!} target="_blank" rel="noreferrer" className="block overflow-hidden" title="Ouvrir en grand">
-                      {/* eslint-disable-next-line @next/next/no-img-element -- lien signé temporaire du stockage privé */}
-                      <img
-                        src={f.url!}
-                        alt={f.name}
-                        className="aspect-[3/4] w-full object-cover object-top transition-transform group-hover:scale-[1.03]"
-                      />
-                    </a>
-                    <div className="flex items-center justify-between gap-2 border-t border-line bg-card px-2.5 py-2">
-                      <span className="grid min-w-0 text-[12px] leading-tight">
-                        <span className="truncate font-medium text-fg">{f.name}</span>
-                        <span className="text-muted">{FILE_KIND_LABEL[f.kind]} · {formatSize(f.size)}</span>
-                      </span>
-                      <form action={deleteRequestFile}>
-                        <input type="hidden" name="id" value={f.id} />
-                        <ConfirmButton message={`Supprimer « ${f.name} » ?`} className={deleteIconClass}>
-                          <Icon name="trash" className="size-4" />
-                        </ConfirmButton>
-                      </form>
-                    </div>
-                  </li>
-                ))}
-              </ul>
-            )}
-
-            {others.length > 0 && (
-              <ul className="mb-4 grid gap-2">
-                {others.map((f) => (
-                  <li key={f.id} className="flex items-center gap-3 rounded-lg border border-line px-3 py-2.5">
-                    <span className="flex size-9 flex-none items-center justify-center rounded-md bg-red-50 text-[11px] font-bold text-red-700 dark:bg-red-400/10 dark:text-red-300">
-                      {f.mime === "application/pdf" ? "PDF" : "DOC"}
-                    </span>
-                    <span className="grid min-w-0 flex-1 text-[13.5px] leading-tight">
-                      <span className="truncate font-medium text-fg">{f.name}</span>
-                      <span className="text-muted">
-                        {FILE_KIND_LABEL[f.kind]} · {formatSize(f.size)}
-                      </span>
-                    </span>
-                    {f.url && (
-                      <a href={f.url} target="_blank" rel="noreferrer" className={`${ghostButtonClass} h-8 px-3 text-[13px]`}>
-                        Ouvrir
-                      </a>
-                    )}
-                    <form action={deleteRequestFile}>
-                      <input type="hidden" name="id" value={f.id} />
-                      <ConfirmButton message={`Supprimer « ${f.name} » ?`} className={deleteIconClass}>
-                        <Icon name="trash" className="size-4" />
-                      </ConfirmButton>
-                    </form>
-                  </li>
-                ))}
-              </ul>
-            )}
+            <RequestFiles requestId={r.id} files={files} />
 
             <form
               action={uploadRequestFiles}

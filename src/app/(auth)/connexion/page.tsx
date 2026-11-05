@@ -1,7 +1,9 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { redirect } from "next/navigation";
 import { Suspense } from "react";
 import { LoginForm } from "@/components/auth/forms";
+import { getCurrentUser, homeFor } from "@/lib/auth";
 import { isSupabaseConfigured } from "@/lib/supabase/server";
 
 export const metadata: Metadata = { title: "Connexion" };
@@ -15,6 +17,12 @@ function Notice({ children }: { children: React.ReactNode }) {
 async function Login({ searchParams }: { searchParams: SearchParams }) {
   const sp = await searchParams;
   const next = typeof sp.next === "string" ? sp.next : undefined;
+
+  // Déjà connecté (session gardée 400 jours) : on va directement dans l'espace au lieu de redemander le mot de passe.
+  if (isSupabaseConfigured) {
+    const user = await getCurrentUser();
+    if (user) redirect(next && /^\/(?![/\\])/.test(next) ? next : homeFor(user.role));
+  }
   let notice: React.ReactNode = null;
   if (sp.erreur === "lien") notice = <Notice>Ce lien a expiré ou a déjà été utilisé. Connectez-vous ou demandez un nouveau lien.</Notice>;
   if (!isSupabaseConfigured) {

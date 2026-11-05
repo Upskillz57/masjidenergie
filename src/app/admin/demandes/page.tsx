@@ -1,5 +1,7 @@
 import Link from "next/link";
-import { Card, EmptyState, Icon, inputClass, PageHeader, Stat, StatusBadge } from "@/components/dashboard/ui";
+import { StatusSelect } from "@/components/admin/forms";
+import { ShareButton } from "@/components/admin/share-dialog";
+import { Card, EmptyState, Icon, inputClass, PageHeader, Stat } from "@/components/dashboard/ui";
 import { listRequests } from "@/lib/admin/data";
 import { formatDate, isRequestStatus, REQUEST_STATUSES, STATUS_META } from "@/lib/workflow";
 
@@ -33,7 +35,7 @@ export default async function RequestsPage({ searchParams }: { searchParams: Sea
       <PageHeader
         eyebrow="ESPACE ADMIN"
         title="Demandes d’étude"
-        description="Toutes les demandes envoyées depuis le site, avec leurs factures. Cliquez sur une demande pour la traiter."
+        description="Toutes les demandes envoyées depuis le site, avec leurs factures. Changez le statut directement sur la ligne, envoyez une demande par e-mail avec ses pièces jointes, ou cliquez dessus pour la traiter."
       />
 
       <div className="mb-6 grid gap-3.5 sm:grid-cols-2 xl:grid-cols-4">
@@ -166,8 +168,17 @@ export default async function RequestsPage({ searchParams }: { searchParams: Sea
                       {r.assignee ? r.assignee.full_name || r.assignee.email : <span className="italic">Non assignée</span>}
                     </td>
                     <td className="whitespace-nowrap text-[13.5px] text-muted md:px-3 md:py-3.5">{formatDate(r.created_at)}</td>
-                    <td className="md:px-5 md:py-3.5 md:text-right">
-                      <StatusBadge status={r.status} />
+                    <td className="md:px-5 md:py-3.5">
+                      <span className="relative z-10 flex items-center gap-1.5 md:justify-end">
+                        <StatusSelect id={r.id} status={r.status} />
+                        <ShareButton
+                          requestId={r.id}
+                          label={`Partager la demande de ${r.mosque_name}`}
+                          className="flex size-8 flex-none cursor-pointer items-center justify-center rounded-md text-muted hover:bg-card hover:text-brand-text"
+                        >
+                          <Icon name="share" className="size-4" />
+                        </ShareButton>
+                      </span>
                     </td>
                   </tr>
                 );
