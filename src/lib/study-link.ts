@@ -16,7 +16,7 @@ export function createStudyToken(requestId: string) {
   return `${payload}.${sign(payload)}`;
 }
 
-export const studyUploadUrl = (requestId: string) => `${site.url}/etude/${createStudyToken(requestId)}`;
+export const studyUploadUrl = (requestId: string) => `${site.publicUrl}/etude/${createStudyToken(requestId)}`;
 
 /** Renvoie l'identifiant de la demande si le lien est authentique et encore valable. */
 export function verifyStudyToken(token: string): string | null {

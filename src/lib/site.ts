@@ -19,6 +19,13 @@ export const site = {
     "Masjid Energie accompagne les mosquées de France dans leur transition énergétique grâce au photovoltaïque.",
   // Adresse publique, sans « . » ni « / » final (liens des e-mails, QR codes, sitemap).
   url: (process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000").trim().replace(/[./]+$/, ""),
+  /**
+   * Adresse utilisée dans les e-mails : toujours le site en ligne, même quand l'e-mail part d'un serveur local
+   * (un lien « localhost » ne s'ouvre que sur la machine du développeur, jamais chez le destinataire).
+   */
+  get publicUrl() {
+    return /\/\/(localhost|127\.0\.0\.1|0\.0\.0\.0)(:|$)/.test(this.url) ? "https://masjidenergie.fr" : this.url;
+  },
   contact: {
     person: "Aboubacar Barry",
     phone: "+33 6 01 86 95 63",

@@ -41,9 +41,12 @@ export function emailLayout(
   cta?: { label: string; href: string },
   opts: { eyebrow?: string; preheader?: string } = {},
 ) {
-  const logo = `${site.url}/brand/email/logo-email.png`;
+  const base = site.publicUrl;
+  const logo = `${base}/brand/email/logo-email.png`;
+  // Les boutons construits avec l'adresse locale pointent vers le site en ligne.
+  const href = cta ? (cta.href.startsWith(site.url) ? base + cta.href.slice(site.url.length) : cta.href) : "";
   const button = cta
-    ? `<table role="presentation" cellpadding="0" cellspacing="0" style="margin:28px 0 8px"><tr><td style="border-radius:10px;background:${C.gold}"><a href="${escapeHtml(cta.href)}" target="_blank" rel="noopener" style="display:inline-block;padding:14px 26px;font:700 15px/1 ${FONT};color:${C.deep};text-decoration:none;border-radius:10px">${escapeHtml(cta.label)} &rarr;</a></td></tr></table>`
+    ? `<table role="presentation" cellpadding="0" cellspacing="0" style="margin:28px 0 8px"><tr><td style="border-radius:10px;background:${C.gold}"><a href="${escapeHtml(href)}" target="_blank" rel="noopener" style="display:inline-block;padding:14px 26px;font:700 15px/1 ${FONT};color:${C.deep};text-decoration:none;border-radius:10px">${escapeHtml(cta.label)} &rarr;</a></td></tr></table><p style="margin:10px 0 0;font:400 12.5px/1.5 ${FONT};color:${C.muted}">Si le bouton ne s’ouvre pas, copiez ce lien dans votre navigateur :<br><a href="${escapeHtml(href)}" target="_blank" rel="noopener" style="color:${C.green};word-break:break-all">${escapeHtml(href)}</a></p>`
     : "";
   const eyebrow = opts.eyebrow
     ? `<p style="margin:0 0 8px;font:700 11.5px/1 ${FONT};letter-spacing:.22em;text-transform:uppercase;color:${C.gold}">${escapeHtml(opts.eyebrow)}</p>`
@@ -57,7 +60,7 @@ ${opts.preheader ? `<div style="display:none;max-height:0;overflow:hidden;opacit
 <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:${C.cream}"><tr><td align="center" style="padding:32px 12px">
 <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:600px;background:#ffffff;border-radius:16px;overflow:hidden;box-shadow:0 8px 30px rgba(10,61,46,.08)">
 <tr><td style="background:${C.deep};background-image:linear-gradient(160deg,${C.green} 0%,${C.deep} 75%);padding:26px 32px">
-<a href="${site.url}" style="text-decoration:none"><img src="${logo}" width="240" height="54" alt="${escapeHtml(site.name)}" style="display:block;border:0;width:240px;height:auto;color:#ffffff;font:700 22px ${FONT}"></a>
+<a href="${base}" style="text-decoration:none"><img src="${logo}" width="240" height="54" alt="${escapeHtml(site.name)}" style="display:block;border:0;width:240px;height:auto;color:#ffffff;font:700 22px ${FONT}"></a>
 </td></tr>
 <tr><td style="height:4px;line-height:4px;font-size:0;background:${C.gold}">&nbsp;</td></tr>
 <tr><td style="padding:34px 32px 10px;font:400 15px/1.6 ${FONT};color:${C.text}">
@@ -68,7 +71,7 @@ ${body}${button}
 <strong style="color:${C.green}">${escapeHtml(site.name)}</strong><br>
 L’énergie solaire au service des mosquées de France · sans crédit, sans emprunt, sans endettement<br>
 <a href="${site.contact.phoneHref}" style="color:${C.muted};text-decoration:none">${escapeHtml(site.contact.phone)}</a> ·
-<a href="${site.url}" style="color:${C.green};text-decoration:none">${escapeHtml(site.url.replace(/^https?:\/\//, ""))}</a>
+<a href="${base}" style="color:${C.green};text-decoration:none">${escapeHtml(base.replace(/^https?:\/\//, ""))}</a>
 </td></tr>
 </table>
 </td></tr></table>

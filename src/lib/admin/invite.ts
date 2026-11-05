@@ -7,7 +7,7 @@ import type { Role } from "@/lib/workflow";
 
 /** Lien d'activation à usage unique, vérifié par /auth/confirm puis redirigé vers le choix du mot de passe. */
 const confirmUrl = (tokenHash: string, type: "invite" | "recovery") =>
-  `${site.url}/auth/confirm?token_hash=${encodeURIComponent(tokenHash)}&type=${type}&next=/compte/mot-de-passe`;
+  `${site.publicUrl}/auth/confirm?token_hash=${encodeURIComponent(tokenHash)}&type=${type}&next=/compte/mot-de-passe`;
 
 /**
  * Crée (ou retrouve) le compte, fixe son rôle et sa mosquée, puis envoie le lien pour choisir un mot de passe.
