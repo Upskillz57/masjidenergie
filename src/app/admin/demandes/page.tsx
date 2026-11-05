@@ -73,7 +73,7 @@ export default async function RequestsPage({ searchParams }: { searchParams: Sea
 
       <form className="mb-5 flex flex-wrap items-center gap-3" role="search">
         {status && <input type="hidden" name="statut" value={status} />}
-        <div className="relative min-w-[240px] flex-1">
+        <div className="relative basis-full sm:min-w-[240px] sm:flex-1 sm:basis-auto">
           <Icon name="search" className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted" />
           <input
             name="q"
@@ -89,11 +89,12 @@ export default async function RequestsPage({ searchParams }: { searchParams: Sea
         </label>
         <label className="flex cursor-pointer items-center gap-2 text-[14px] text-fg">
           <input type="checkbox" name="bornes" value="1" defaultChecked={chargers} className="size-4 accent-brand" />
-          Avec bornes de recharge
+          <span className="sm:hidden">Avec bornes</span>
+          <span className="hidden sm:inline">Avec bornes de recharge</span>
         </label>
         <button
           type="submit"
-          className="h-10 cursor-pointer rounded-lg bg-brand px-4 text-[14px] font-semibold text-white hover:bg-brand-hover"
+          className="ml-auto h-10 cursor-pointer sm:ml-0 rounded-lg bg-brand px-4 text-[14px] font-semibold text-white hover:bg-brand-hover"
         >
           Filtrer
         </button>
@@ -132,8 +133,11 @@ export default async function RequestsPage({ searchParams }: { searchParams: Sea
               {rows.map((r) => {
                 const files = (r.request_files[0]?.count ?? 0) - r.studyFiles;
                 return (
-                  <tr key={r.id} className="relative grid gap-1.5 px-5 py-4 hover:bg-bg-soft md:table-row md:p-0">
-                    <td className="md:px-5 md:py-3.5">
+                  <tr
+                    key={r.id}
+                    className="relative flex flex-wrap items-center gap-x-2 gap-y-2.5 px-4 py-4 hover:bg-bg-soft sm:px-5 md:table-row md:p-0"
+                  >
+                    <td className="w-full md:w-auto md:px-5 md:py-3.5">
                       <Link href={`/admin/demandes/${r.id}`} className="grid after:absolute after:inset-0">
                         <span className="font-semibold text-heading">
                           {r.mosque_name}
@@ -151,16 +155,16 @@ export default async function RequestsPage({ searchParams }: { searchParams: Sea
                         </span>
                       </Link>
                     </td>
-                    <td className="text-[13.5px] md:px-3 md:py-3.5">
-                      <span className="grid">
+                    <td className="min-w-0 flex-1 text-[13.5px] md:flex-none md:px-3 md:py-3.5">
+                      <span className="flex flex-wrap gap-x-2 md:grid">
                         <span className="text-fg">
                           {r.first_name} {r.last_name}
                         </span>
                         <span className="text-muted">{r.phone}</span>
                       </span>
                     </td>
-                    <td className="md:px-3 md:py-3.5">
-                      <span className="flex items-center gap-3 text-[13px] text-muted">
+                    <td className="order-1 w-full md:order-none md:ml-0 md:w-auto md:flex-none md:px-3 md:py-3.5">
+                      <span className="flex flex-wrap items-center gap-x-3 gap-y-1.5 text-[13px] text-muted">
                         <span className="flex items-center gap-1" title={`${files} facture(s)`}>
                           <Icon name="clip" className="size-4" /> {files}
                         </span>
@@ -179,14 +183,16 @@ export default async function RequestsPage({ searchParams }: { searchParams: Sea
                         )}
                       </span>
                     </td>
-                    <td className="whitespace-nowrap text-[13.5px] text-muted md:px-3 md:py-3.5">{formatDate(r.created_at)}</td>
-                    <td className="md:px-3 md:py-3.5">
+                    <td className="ml-auto self-start whitespace-nowrap text-[13px] text-muted md:ml-0 md:self-auto md:px-3 md:py-3.5 md:text-[13.5px]">
+                      {formatDate(r.created_at)}
+                    </td>
+                    <td className="order-2 md:order-none md:ml-0 md:w-auto md:flex-none md:px-3 md:py-3.5">
                       <AssigneeSelect id={r.id} assignee={r.assigned_to} staff={staff} />
                     </td>
-                    <td className="md:px-3 md:py-3.5">
+                    <td className="order-2 md:order-none md:ml-0 md:w-auto md:flex-none md:px-3 md:py-3.5">
                       <StatusSelect id={r.id} status={r.status} />
                     </td>
-                    <td className="md:px-3 md:py-3.5">
+                    <td className="order-3 md:order-none md:ml-0 md:w-auto md:flex-none md:px-3 md:py-3.5">
                       <span className="relative z-10 inline-flex">
                         <ShareButton
                           requestId={r.id}
@@ -197,7 +203,7 @@ export default async function RequestsPage({ searchParams }: { searchParams: Sea
                         </ShareButton>
                       </span>
                     </td>
-                    <td className="md:px-5 md:py-3.5">
+                    <td className={`order-3 md:order-none md:ml-0 md:w-auto md:flex-none md:table-cell md:px-5 md:py-3.5 ${r.studyFiles > 0 ? "" : "hidden"}`}>
                       {r.studyFiles > 0 ? (
                         <span className="relative z-10 inline-flex">
                           <ShareButton
@@ -210,7 +216,7 @@ export default async function RequestsPage({ searchParams }: { searchParams: Sea
                           </ShareButton>
                         </span>
                       ) : (
-                        <span className="hidden text-[13px] italic text-muted md:inline">En attente</span>
+                        <span className="text-[13px] italic text-muted">En attente</span>
                       )}
                     </td>
                   </tr>
