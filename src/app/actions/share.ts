@@ -4,15 +4,18 @@ import { demoGetRequest } from "@/lib/admin/demo";
 import { requireStaff } from "@/lib/auth";
 import { FILE_KIND_LABEL, type FileKind } from "@/lib/dossier";
 import { emailLayout, emailTable, escapeHtml, sendEmail } from "@/lib/email";
+import { refresh } from "next/cache";
+import { studyUploadUrl } from "@/lib/study-link";
 import { createAdminClient, DOCUMENTS_BUCKET, isSupabaseConfigured } from "@/lib/supabase/server";
-import { formatDate, formatSize, isRequestStatus, STATUS_META } from "@/lib/workflow";
+import { formatDate, formatSize, isRequestStatus, isStudyPath, STATUS_META } from "@/lib/workflow";
 import type { ActionState } from "@/app/actions/admin";
 
 const UUID = /^[0-9a-f-]{36}$/i;
 /** Resend refuse les e-mails de plus de 40 Mo, pièces jointes encodées en base64 (+33 %) comprises. */
 const MAX_ATTACHMENTS_BYTES = 25 * 1024 * 1024;
 
-export type ShareFile = { id: string; name: string; size: number; kind: FileKind };
+/** `study` : document de l'étude réalisée (renvoyé par le bureau d'études). */
+export type ShareFile = { id: string; name: string; size: number; kind: FileKind; study: boolean };
 export type ShareData = {
   id: string;
   number: number;
@@ -53,16 +56,19 @@ export async function getShareData(requestId: string): Promise<ShareData | null>
     const demo = demoGetRequest(requestId);
     if (!demo) return null;
     req = demo.request;
-    files = demo.files.map((f) => ({ id: f.id, name: f.name, size: f.size, kind: f.kind }));
+    files = demo.files.map((f) => ({ id: f.id, name: f.name, size: f.size, kind: f.kind, study: f.study }));
   } else {
     const db = createAdminClient();
     const [r, f] = await Promise.all([
       db.from("study_requests").select("*").eq("id", requestId).maybeSingle<Req>(),
-      db.from("request_files").select("id, name, size, kind").eq("request_id", requestId).order("created_at"),
+      db.from("request_files").select("id, path, name, size, kind").eq("request_id", requestId).order("created_at"),
     ]);
     if (!r.data) return null;
     req = r.data;
-    files = (f.data ?? []) as ShareFile[];
+    files = ((f.data ?? []) as (Omit<ShareFile, "study"> & { path: string })[]).map(({ path, ...x }) => ({
+      ...x,
+      study: isStudyPath(path),
+    }));
   }
 
   return {
@@ -92,7 +98,11 @@ const paragraphs = (text: string) =>
 const sectionTitle = (s: string) =>
   `<p style="margin:26px 0 6px;font-weight:700;font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:#c8a24c">${escapeHtml(s)}</p>`;
 
-/** Envoie la demande par e-mail (mise en page du site), avec les documents choisis en pièces jointes. */
+/**
+ * Envoie par e-mail (mise en page du site), avec les documents choisis en pièces jointes :
+ * - la demande, au bureau d'études, avec le bouton « Déposer l'étude » (lien signé) ;
+ * - ou l'étude réalisée (`mode=study`), à la mosquée.
+ */
 export async function shareRequestByEmail(_: ActionState, formData: FormData): Promise<ActionState> {
   const user = await requireStaff();
   const requestId = String(formData.get("id") ?? "");
@@ -108,6 +118,8 @@ export async function shareRequestByEmail(_: ActionState, formData: FormData): P
   const message = String(formData.get("message") ?? "").trim().slice(0, 10000);
   if (!subject) return { message: "Indiquez un objet." };
   const fileIds = formData.getAll("files").map(String).filter((v) => UUID.test(v));
+  const studyMode = formData.get("mode") === "study";
+  const uploadLink = !studyMode && formData.get("uploadLink") === "1";
 
   if (!isSupabaseConfigured) return { message: "Mode démo : configurez Supabase et Resend pour envoyer l’e-mail." };
 
@@ -154,9 +166,11 @@ export async function shareRequestByEmail(_: ActionState, formData: FormData): P
     replyTo: user.email,
     subject,
     html: emailLayout(
-      `Demande d’étude : ${r.mosque_name}`,
-      `${paragraphs(message)}${sectionTitle("La demande")}${emailTable(recap)}${list}`,
-      undefined,
+      studyMode ? `Votre étude solaire : ${r.mosque_name}` : `Demande d’étude : ${r.mosque_name}`,
+      studyMode
+        ? `${paragraphs(message)}${list}`
+        : `${paragraphs(message)}${sectionTitle("La demande")}${emailTable(recap)}${list}`,
+      uploadLink ? { label: "Consulter la demande et déposer l’étude", href: studyUploadUrl(requestId) } : undefined,
       {
         eyebrow: `Demande n°${r.number}`,
         preheader: message.split("\n").find((l) => l.trim()) ?? `${r.mosque_name} · ${files.length} document(s)`,
@@ -169,9 +183,20 @@ export async function shareRequestByEmail(_: ActionState, formData: FormData): P
   await db.from("request_events").insert({
     request_id: requestId,
     actor_id: user.id,
-    type: "shared",
+    type: studyMode ? "study_shared" : "shared",
     data: { to: to.join(", "), files: files.length },
   });
+  // L'étude part chez la mosquée : la demande passe à « Étude envoyée » si elle n'en était pas encore là.
+  if (studyMode && ["nouvelle", "en_attente", "en_cours"].includes(r.status)) {
+    await db.from("study_requests").update({ status: "etude_envoyee" }).eq("id", requestId);
+    await db.from("request_events").insert({
+      request_id: requestId,
+      actor_id: user.id,
+      type: "status",
+      data: { from: r.status, to: "etude_envoyee" },
+    });
+  }
+  refresh();
   const n = files.length;
   return {
     ok: true,

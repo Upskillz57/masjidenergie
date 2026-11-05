@@ -2,7 +2,7 @@ import "server-only";
 
 import type { CurrentUser } from "@/lib/auth";
 import type { AccountRequestRow, RequestFile, RequestRow } from "@/lib/admin/data";
-import type { RequestStatus, Role } from "@/lib/workflow";
+import type { AccountState, RequestStatus, Role } from "@/lib/workflow";
 
 // Données fictives affichées uniquement en développement tant que Supabase n'est pas configuré,
 // pour pouvoir parcourir l'admin et l'espace mosquée sans base de données.
@@ -68,6 +68,8 @@ const requests: (RequestRow & {
       project_motivations: i % 2 === 0 ? ["economie", "hausse"] : [],
       project_context: null,
       mosque_id: null,
+      // Démo : les projets avancés ont un compte, une demande de compte attend pour la n°107.
+      account: (["signee", "installee", "etude_envoyee"].includes(status) ? "compte" : i === 1 ? "demande" : "aucun") as AccountState,
       assigned_to: assignee?.id ?? null,
       assignee,
       request_files: [{ count: files }],
@@ -111,9 +113,24 @@ export function demoGetRequest(id: string) {
       kind: "facture",
       created_at: request.created_at,
       url: pdf ? null : demoBill(`${months[i]} 2026`, amounts[i]),
+      study: false,
     };
   });
+  // Démo : une étude déjà déposée pour les demandes au statut « Étude envoyée » et au-delà.
+  if (["etude_envoyee", "signee", "installee"].includes(request.status)) {
+    files.push({
+      id: `${id.slice(0, -2)}e1`,
+      name: "etude-solaire-36kwc.pdf",
+      size: 2_400_000,
+      mime: "application/pdf",
+      kind: "document",
+      created_at: request.updated_at,
+      url: null,
+      study: true,
+    });
+  }
   return {
+    account: request.account,
     user: DEMO_USER,
     request,
     files,

@@ -7,13 +7,15 @@ import {
   updateRequestStatus,
   uploadRequestFiles,
 } from "@/app/actions/admin";
-import { AutoSubmitSelect, ConfirmButton, SubmitButton } from "@/components/admin/forms";
+import { AutoSubmitSelect, ConfirmButton, CopyLinkButton, InviteAccountForm, SubmitButton } from "@/components/admin/forms";
 import { RequestFiles } from "@/components/admin/request-files";
 import { ShareButton } from "@/components/admin/share-dialog";
+import { StudyUploadForm } from "@/components/admin/study-upload-form";
 import { DossierChecklist, ProjectContextForm } from "@/components/dossier/dossier";
-import { Card, ghostButtonClass, Icon, inputClass, StatusBadge } from "@/components/dashboard/ui";
+import { AccountBadge, buttonClass, Card, ghostButtonClass, Icon, inputClass, StatusBadge } from "@/components/dashboard/ui";
 import { getRequest } from "@/lib/admin/data";
 import { dossierPieces, FILE_KIND_LABEL, FILE_KINDS, missingPieces } from "@/lib/dossier";
+import { createStudyToken, studyUploadUrl } from "@/lib/study-link";
 import {
   formatDate,
   formatDateTime,
@@ -22,6 +24,9 @@ import {
   ROLE_LABEL,
   STATUS_META,
 } from "@/lib/workflow";
+
+const pj = (n: unknown) =>
+  Number(n) ? ` (${n} pièce${Number(n) > 1 ? "s" : ""} jointe${Number(n) > 1 ? "s" : ""})` : "";
 
 const personName = (p: { full_name: string | null; email: string } | null) => (p ? p.full_name || p.email : "Système");
 
@@ -41,7 +46,13 @@ function eventLabel(type: string, data: Record<string, string | number | null | 
     case "file_deleted":
       return `Document supprimé : ${data.name}`;
     case "shared":
-      return `Partagée par e-mail à ${data.to}${Number(data.files) ? ` (${data.files} pièce${Number(data.files) > 1 ? "s" : ""} jointe${Number(data.files) > 1 ? "s" : ""})` : ""}`;
+      return `Partagée par e-mail à ${data.to}${pj(data.files)}`;
+    case "study_shared":
+      return `Étude envoyée par e-mail à ${data.to}${pj(data.files)}`;
+    case "study_uploaded":
+      return `Étude déposée par ${data.by}${data.company ? ` (${data.company})` : ""}${Number(data.files) ? ` : ${data.names}` : ""}`;
+    case "account_invite":
+      return `Invitation à créer un compte envoyée à ${data.to}`;
     default:
       return type;
   }
@@ -51,7 +62,12 @@ export default async function RequestDetailPage({ params }: { params: Promise<{ 
   const { id } = await params;
   const detail = await getRequest(id);
   if (!detail) notFound();
-  const { request: r, files, comments, events, staff, user, linky } = detail;
+  const { request: r, files, comments, events, staff, user, linky, account } = detail;
+  const requestFiles = files.filter((f) => !f.study);
+  const studyFiles = files.filter((f) => f.study);
+  type Deposit = { id: string; created_at: string; data: Record<string, string | number | null | undefined> };
+  const studyDeposits = events.filter((e) => e.type === "study_uploaded") as Deposit[];
+  const lastInvite = events.find((e) => e.type === "account_invite");
   const pieces = dossierPieces({
     bills: files.filter((f) => f.kind === "facture").length,
     enedisFiles: files.filter((f) => f.kind === "enedis").length,
@@ -92,6 +108,7 @@ export default async function RequestDetailPage({ params }: { params: Promise<{ 
               <Icon name="plug" className="size-3.5" /> Bornes de recharge souhaitées
             </span>
           )}
+          {account !== "compte" && <AccountBadge state={account} />}
           <StatusBadge status={r.status} />
           <ShareButton requestId={r.id} className={`${ghostButtonClass} h-9 px-3 text-[13.5px]`}>
             <Icon name="share" className="size-4" /> Partager
@@ -147,6 +164,36 @@ export default async function RequestDetailPage({ params }: { params: Promise<{ 
                 <p className="whitespace-pre-line">{r.message}</p>
               </div>
             )}
+            {account !== "compte" && (
+              <div className="mt-5 flex flex-wrap items-center gap-4 rounded-lg border border-amber-300/60 bg-amber-50 px-4 py-3 dark:border-amber-400/25 dark:bg-amber-400/10">
+                <span className="flex size-9 flex-none items-center justify-center rounded-full bg-amber-100 text-amber-800 dark:bg-amber-400/15 dark:text-amber-300">
+                  <Icon name="userPlus" className="size-[18px]" />
+                </span>
+                <div className="grid min-w-[200px] flex-1 gap-0.5 text-[13.5px]">
+                  <span className="font-semibold text-heading">
+                    {account === "demande"
+                      ? "Demande de compte en attente de validation"
+                      : "Cette mosquée n’a pas encore de compte Masjid Energie"}
+                  </span>
+                  <span className="text-muted">
+                    {account === "demande" ? (
+                      <>
+                        Validez-la dans{" "}
+                        <Link href="/admin/comptes" className="font-medium text-brand-text hover:underline">
+                          Comptes mosquées
+                        </Link>{" "}
+                        pour ouvrir son espace en ligne.
+                      </>
+                    ) : lastInvite ? (
+                      `Invitation envoyée le ${formatDateTime(lastInvite.created_at)}.`
+                    ) : (
+                      "Invitez le demandeur à créer l’espace en ligne de sa mosquée pour suivre sa demande."
+                    )}
+                  </span>
+                </div>
+                {account === "aucun" && <InviteAccountForm id={r.id} again={Boolean(lastInvite)} />}
+              </div>
+            )}
           </Card>
 
           <Card
@@ -176,8 +223,9 @@ export default async function RequestDetailPage({ params }: { params: Promise<{ 
             </div>
           </Card>
 
-          <Card title={`Factures et documents (${files.length})`} icon="clip">
-            <RequestFiles requestId={r.id} files={files} />
+          <div className="grid items-start gap-6 2xl:grid-cols-2">
+          <Card title={`La demande : factures et documents (${requestFiles.length})`} icon="clip">
+            <RequestFiles requestId={r.id} files={requestFiles} />
 
             <form
               action={uploadRequestFiles}
@@ -196,13 +244,67 @@ export default async function RequestDetailPage({ params }: { params: Promise<{ 
               <select name="kind" defaultValue="document" aria-label="Type de document" className={`${inputClass} w-auto cursor-pointer`}>
                 {FILE_KINDS.map((k) => (
                   <option key={k} value={k}>
-                    {k === "document" ? "Document (étude, devis, photo…)" : FILE_KIND_LABEL[k]}
+                    {k === "document" ? "Document (devis, photo…)" : FILE_KIND_LABEL[k]}
                   </option>
                 ))}
               </select>
               <SubmitButton pendingLabel="Envoi…">Ajouter</SubmitButton>
             </form>
           </Card>
+
+          <Card
+            title={`L’étude réalisée${studyFiles.length ? ` (${studyFiles.length})` : ""}`}
+            icon="sun"
+            actions={
+              studyFiles.length > 0 && (
+                <ShareButton mode="study" requestId={r.id} className={`${buttonClass} h-8 px-3 text-[13px]`}>
+                  <Icon name="mail" className="size-4" /> Envoyer à la mosquée
+                </ShareButton>
+              )
+            }
+          >
+            {studyFiles.length === 0 ? (
+              <div className="mb-5 grid justify-items-start gap-3 rounded-lg bg-bg-soft px-4 py-4 text-[14px] text-muted">
+                <p>
+                  En attente de l’étude. Partagez la demande au bureau d’études : l’e-mail contient un bouton pour déposer
+                  l’étude, qui arrivera directement ici.
+                </p>
+                <ShareButton requestId={r.id} className={`${ghostButtonClass} h-9 px-3 text-[13.5px]`}>
+                  <Icon name="share" className="size-4" /> Partager la demande
+                </ShareButton>
+              </div>
+            ) : (
+              <RequestFiles requestId={r.id} files={studyFiles} mode="study" />
+            )}
+
+            {studyDeposits.length > 0 && (
+              <ul className="mb-5 grid gap-3">
+                {studyDeposits.map((e) => (
+                  <li key={e.id} className="rounded-lg border border-line px-4 py-3 text-[13.5px]">
+                    <p className="text-muted">
+                      Déposée par <span className="font-semibold text-heading">{String(e.data.by ?? "")}</span>
+                      {e.data.company ? ` (${e.data.company})` : ""} · {formatDateTime(e.created_at)}
+                    </p>
+                    {e.data.note && <p className="mt-1.5 whitespace-pre-line leading-relaxed text-fg">{String(e.data.note)}</p>}
+                  </li>
+                ))}
+              </ul>
+            )}
+
+            <details className="group rounded-lg border border-dashed border-line">
+              <summary className="flex cursor-pointer list-none items-center gap-2 px-4 py-3 text-[14px] font-semibold text-brand-text">
+                <Icon name="upload" className="size-4" /> Ajouter l’étude vous-même
+              </summary>
+              <div className="border-t border-line p-4">
+                <StudyUploadForm token={createStudyToken(r.id)} staff />
+              </div>
+            </details>
+            <div className="mt-4 flex flex-wrap items-center justify-between gap-2 text-[12.5px] text-muted">
+              <span>Lien de dépôt pour le bureau d’études, valable 90 jours :</span>
+              <CopyLinkButton value={studyUploadUrl(r.id)} />
+            </div>
+          </Card>
+          </div>
 
           <Card title={`Commentaires internes (${comments.length})`} icon="message">
             {comments.length === 0 ? (

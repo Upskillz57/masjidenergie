@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { deleteRequestFile } from "@/app/actions/admin";
 import { ConfirmButton } from "@/components/admin/forms";
-import { ShareButton } from "@/components/admin/share-dialog";
+import { ShareButton, type ShareMode } from "@/components/admin/share-dialog";
 import { ghostButtonClass, Icon } from "@/components/dashboard/ui";
 import type { RequestFile } from "@/lib/admin/data";
 import { FILE_KIND_LABEL } from "@/lib/dossier";
@@ -17,7 +17,16 @@ const deleteIconClass =
   "flex size-8 flex-none cursor-pointer items-center justify-center rounded-md text-muted hover:bg-red-50 hover:text-red-600 dark:hover:bg-red-400/10";
 
 /** Factures et documents d'une demande : sélection multiple, téléchargement groupé (ZIP) et partage. */
-export function RequestFiles({ requestId, files }: { requestId: string; files: RequestFile[] }) {
+export function RequestFiles({
+  requestId,
+  files,
+  mode = "request",
+}: {
+  requestId: string;
+  files: RequestFile[];
+  /** `study` : documents de l'étude, partagés avec la mosquée. */
+  mode?: ShareMode;
+}) {
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const download = (ids: string[]) => `/admin/demandes/${requestId}/telecharger${ids.length ? `?f=${ids.join(",")}` : ""}`;
 
@@ -44,6 +53,7 @@ export function RequestFiles({ requestId, files }: { requestId: string; files: R
       <ShareButton
         requestId={requestId}
         fileIds={[f.id]}
+        mode={mode}
         title={`Partager « ${f.name} »`}
         label={`Partager ${f.name}`}
         className={iconButton}
@@ -92,6 +102,7 @@ export function RequestFiles({ requestId, files }: { requestId: string; files: R
           <ShareButton
             requestId={requestId}
             fileIds={ids.length ? ids : undefined}
+            mode={mode}
             className={`${ghostButtonClass} h-8 px-3 text-[13px]`}
           >
             <Icon name="share" className="size-4" />

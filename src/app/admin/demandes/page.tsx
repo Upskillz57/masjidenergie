@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { StatusSelect } from "@/components/admin/forms";
 import { ShareButton } from "@/components/admin/share-dialog";
-import { Card, EmptyState, Icon, inputClass, PageHeader, Stat } from "@/components/dashboard/ui";
+import { AccountBadge, Card, EmptyState, Icon, inputClass, PageHeader, Stat } from "@/components/dashboard/ui";
 import { listRequests } from "@/lib/admin/data";
 import { formatDate, isRequestStatus, REQUEST_STATUSES, STATUS_META } from "@/lib/workflow";
 
@@ -137,6 +137,11 @@ export default async function RequestsPage({ searchParams }: { searchParams: Sea
                           {r.mosque_name}
                           {r.status === "nouvelle" && (
                             <span className="ml-2 inline-block size-2 rounded-full bg-sky-500 align-middle" />
+                          )}
+                          {r.account !== "compte" && (
+                            <span className="ml-2 inline-block align-middle">
+                              <AccountBadge state={r.account} compact />
+                            </span>
                           )}
                         </span>
                         <span className="text-[13px] text-muted">

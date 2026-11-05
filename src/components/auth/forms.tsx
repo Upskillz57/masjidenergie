@@ -91,6 +91,25 @@ export function NewPasswordForm() {
   );
 }
 
+/** Lien d'invitation envoyé depuis une demande d'étude : /creer-un-compte?mosquee=…&prenom=… pré-remplit le formulaire. */
+const PREFILL: Record<string, string> = {
+  mosquee: "mosqueName",
+  adresse: "mosqueAddress",
+  prenom: "firstName",
+  nom: "lastName",
+  email: "email",
+  tel: "phone",
+};
+const prefill = (form: HTMLFormElement | null) => {
+  if (!form) return;
+  const params = new URLSearchParams(window.location.search);
+  for (const [param, field] of Object.entries(PREFILL)) {
+    const el = form.elements.namedItem(field);
+    const value = params.get(param);
+    if (value && el instanceof HTMLInputElement && !el.value) el.value = value.slice(0, 200);
+  }
+};
+
 export function AccountRequestForm() {
   const [state, action, pending] = useActionState(submitAccountRequest, null);
   if (state?.ok) {
@@ -109,7 +128,7 @@ export function AccountRequestForm() {
   }
   const err = state?.errors ?? {};
   return (
-    <form action={action} className="grid gap-5" noValidate>
+    <form ref={prefill} action={action} className="grid gap-5" noValidate>
       <fieldset className="grid gap-3">
         <legend className="mb-1 text-[15px] font-bold text-heading">La mosquée</legend>
         <div className="grid gap-3 sm:grid-cols-2">

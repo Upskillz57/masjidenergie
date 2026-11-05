@@ -2,7 +2,13 @@
 
 import { useActionState, useState, type ReactNode } from "react";
 import { useFormStatus } from "react-dom";
-import { approveAccountRequest, inviteTeamMember, updateRequestStatus, type ActionState } from "@/app/actions/admin";
+import {
+  approveAccountRequest,
+  inviteRequesterToCreateAccount,
+  inviteTeamMember,
+  updateRequestStatus,
+  type ActionState,
+} from "@/app/actions/admin";
 import { REQUEST_STATUSES, STATUS_META, type RequestStatus } from "@/lib/workflow";
 
 const button =
@@ -176,5 +182,40 @@ export function InviteMemberForm() {
         <Feedback state={state} />
       </div>
     </form>
+  );
+}
+
+/** Envoie au demandeur l'invitation à créer le compte de sa mosquée. */
+export function InviteAccountForm({ id, again }: { id: string; again: boolean }) {
+  const [state, action, pending] = useActionState(inviteRequesterToCreateAccount, null);
+  return (
+    <form action={action} className="grid justify-items-end gap-1.5">
+      <input type="hidden" name="id" value={id} />
+      <button type="submit" disabled={pending} className={`${button} h-9 px-3 text-[13.5px]`}>
+        <svg viewBox="0 0 24 24" aria-hidden="true" className="size-4" fill="none" stroke="currentColor" strokeWidth="1.8">
+          <path d="M4 5h16a1 1 0 0 1 1 1v12a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V6a1 1 0 0 1 1-1M3 7l9 6 9-6" />
+        </svg>
+        {pending ? "Envoi…" : again ? "Renvoyer l’invitation" : "Inviter à créer un compte"}
+      </button>
+      <Feedback state={state} />
+    </form>
+  );
+}
+
+/** Copie un lien dans le presse-papiers. */
+export function CopyLinkButton({ value, label = "Copier le lien" }: { value: string; label?: string }) {
+  const [copied, setCopied] = useState(false);
+  return (
+    <button
+      type="button"
+      onClick={async () => {
+        await navigator.clipboard.writeText(value);
+        setCopied(true);
+        setTimeout(() => setCopied(false), 2000);
+      }}
+      className="inline-flex cursor-pointer items-center gap-1.5 rounded-md border border-line bg-card px-2.5 py-1 font-semibold text-fg hover:bg-bg-soft"
+    >
+      {copied ? "Lien copié" : label}
+    </button>
   );
 }

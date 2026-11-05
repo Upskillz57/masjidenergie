@@ -81,6 +81,12 @@ export const ACCOUNT_STATUS_META = {
 } as const;
 export type AccountRequestStatus = keyof typeof ACCOUNT_STATUS_META;
 
+/** La mosquée qui a fait la demande d'étude a-t-elle un espace en ligne ? */
+export type AccountState = "compte" | "demande" | "aucun";
+
+/** Les fichiers de l'étude sont rangés à part dans le stockage : `demandes/<id>/etude/…`. */
+export const isStudyPath = (path: string) => /^demandes\/[^/]+\/etude\//.test(path);
+
 const timeZone = "Europe/Paris";
 const dateFmt = new Intl.DateTimeFormat("fr-FR", { day: "numeric", month: "short", year: "numeric", timeZone });
 const dateTimeFmt = new Intl.DateTimeFormat("fr-FR", {

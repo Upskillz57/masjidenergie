@@ -8,7 +8,9 @@ import { createAdminClient, DOCUMENTS_BUCKET, isSupabaseConfigured } from "@/lib
 import {
   isRequestStatus,
   REQUEST_STATUSES,
+  isStudyPath,
   type AccountRequestStatus,
+  type AccountState,
   type RequestStatus,
   type Role,
 } from "@/lib/workflow";
@@ -31,7 +33,30 @@ export type RequestRow = {
   assigned_to: string | null;
   assignee: { full_name: string | null; email: string } | null;
   request_files: { count: number }[];
+  mosque_id: string | null;
+  account: AccountState;
 };
+
+type Db = ReturnType<typeof createAdminClient>;
+
+/** Compte de la mosquée : rattachée à une mosquée, compte existant avec cet e-mail, ou demande de compte en attente. */
+async function accountStates(db: Db, rows: { email: string; mosque_id: string | null }[]) {
+  const emails = [...new Set(rows.filter((r) => !r.mosque_id).map((r) => r.email.toLowerCase()))];
+  if (!emails.length) return () => "compte" as AccountState;
+  // Comparaison insensible à la casse : quelques centaines de lignes au plus, filtrées ici.
+  const [{ data: profiles }, { data: pending }] = await Promise.all([
+    db.from("profiles").select("email").eq("role", "mosquee"),
+    db.from("account_requests").select("email").eq("status", "en_attente"),
+  ]);
+  const withAccount = new Set((profiles ?? []).map((p) => p.email.toLowerCase()));
+  const requested = new Set((pending ?? []).map((p) => p.email.toLowerCase()));
+  return (r: { email: string; mosque_id: string | null }): AccountState =>
+    r.mosque_id || withAccount.has(r.email.toLowerCase())
+      ? "compte"
+      : requested.has(r.email.toLowerCase())
+        ? "demande"
+        : "aucun";
+}
 
 export type RequestFilters = { status?: string; q?: string; mine?: boolean; chargers?: boolean };
 
@@ -43,7 +68,7 @@ export async function listRequests(filters: RequestFilters) {
   let query = db
     .from("study_requests")
     .select(
-      "id, number, created_at, updated_at, status, mosque_name, mosque_address, first_name, last_name, phone, email, chargers, assigned_to, assignee:profiles!study_requests_assigned_to_fkey(full_name, email), request_files(count)",
+      "id, number, created_at, updated_at, status, mosque_name, mosque_address, first_name, last_name, phone, email, chargers, assigned_to, mosque_id, assignee:profiles!study_requests_assigned_to_fkey(full_name, email), request_files(count)",
     )
     .order("created_at", { ascending: false })
     .limit(200);
@@ -60,7 +85,7 @@ export async function listRequests(filters: RequestFilters) {
   }
 
   const [{ data: rows, error }, { data: all }] = await Promise.all([
-    query.returns<RequestRow[]>(),
+    query.returns<Omit<RequestRow, "account">[]>(),
     db.from("study_requests").select("status"),
   ]);
   if (error) throw error;
@@ -68,7 +93,8 @@ export async function listRequests(filters: RequestFilters) {
   const counts = Object.fromEntries(REQUEST_STATUSES.map((s) => [s, 0])) as Record<RequestStatus, number>;
   for (const r of all ?? []) if (isRequestStatus(r.status)) counts[r.status]++;
 
-  return { rows: rows ?? [], counts, total: all?.length ?? 0, user };
+  const account = await accountStates(db, rows ?? []);
+  return { rows: (rows ?? []).map((r) => ({ ...r, account: account(r) })), counts, total: all?.length ?? 0, user };
 }
 
 export type RequestFile = {
@@ -79,6 +105,8 @@ export type RequestFile = {
   kind: FileKind;
   created_at: string;
   url: string | null;
+  /** Document de l'étude réalisée (déposé par le bureau d'études ou l'équipe). */
+  study: boolean;
 };
 
 export async function getRequest(id: string) {
@@ -114,7 +142,8 @@ export async function getRequest(id: string) {
   type Person = { full_name: string | null; email: string } | null;
   return {
     user,
-    request: req.data as Omit<RequestRow, "assignee" | "request_files"> & {
+    account: (await accountStates(db, [req.data]))(req.data),
+    request: req.data as Omit<RequestRow, "assignee" | "request_files" | "account"> & {
       mosque_osm: string | null;
       message: string | null;
       project_motivations: string[];
@@ -122,7 +151,11 @@ export async function getRequest(id: string) {
       mosque_id: string | null;
     },
     linky: await findSignedLinky(db, req.data),
-    files: (files.data ?? []).map((f) => ({ ...f, url: urlByPath.get(f.path) ?? null })) as RequestFile[],
+    files: (files.data ?? []).map((f) => ({
+      ...f,
+      url: urlByPath.get(f.path) ?? null,
+      study: isStudyPath(f.path),
+    })) as RequestFile[],
     comments: (comments.data ?? []) as unknown as {
       id: string;
       body: string;

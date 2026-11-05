@@ -2,6 +2,8 @@
 
 import { refresh } from "next/cache";
 import { inviteUser } from "@/lib/admin/invite";
+import { emailLayout, escapeHtml, sendEmail } from "@/lib/email";
+import { site } from "@/lib/site";
 import { requireAdmin, requireStaff } from "@/lib/auth";
 import { isFileKind } from "@/lib/dossier";
 import { createAdminClient, DOCUMENTS_BUCKET, isSupabaseConfigured } from "@/lib/supabase/server";
@@ -120,6 +122,57 @@ export async function deleteRequestFile(formData: FormData) {
   await db.from("request_files").delete().eq("id", fileId);
   await logEvent(data.request_id, user.id, "file_deleted", { name: data.name });
   refresh();
+}
+
+/** E-mail au demandeur pour l'inviter à créer l'espace en ligne de sa mosquée (formulaire pré-rempli). */
+export async function inviteRequesterToCreateAccount(_: ActionState, formData: FormData): Promise<ActionState> {
+  const user = await requireStaff();
+  if (!isSupabaseConfigured) return demoMessage;
+  const requestId = id(formData);
+  const db = createAdminClient();
+  const { data: r } = await db
+    .from("study_requests")
+    .select("id, number, mosque_name, mosque_address, first_name, last_name, email, phone")
+    .eq("id", requestId)
+    .maybeSingle();
+  if (!r) return { message: "Demande introuvable." };
+
+  const params = new URLSearchParams({
+    mosquee: r.mosque_name,
+    adresse: r.mosque_address ?? "",
+    prenom: r.first_name,
+    nom: r.last_name,
+    email: r.email,
+    tel: r.phone,
+  });
+  const p = (t: string) => `<p style="margin:0 0 14px">${t}</p>`;
+  const body = [
+    p(`Assalamou alaykoum ${escapeHtml(r.first_name)},`),
+    p(
+      `Merci pour votre demande d’étude pour <strong>${escapeHtml(r.mosque_name)}</strong>. Pour suivre son avancement, nous vous invitons à créer l’espace en ligne de votre mosquée sur Masjid Energie.`,
+    ),
+    p(
+      "Vous y retrouverez au même endroit : le dossier de votre demande et les pièces à compléter, l’étude solaire dès qu’elle est prête, puis votre consommation, vos factures et le suivi de votre projet.",
+    ),
+    p("Le formulaire est déjà pré-rempli avec les informations de votre demande : il ne vous reste qu’à le vérifier et l’envoyer."),
+    p(`Bien à vous,<br>${escapeHtml(user.fullName || user.email)}<br>L’équipe Masjid Energie`),
+  ].join("");
+
+  const sent = await sendEmail({
+    to: [r.email],
+    replyTo: user.email,
+    subject: `Créez l’espace en ligne de ${r.mosque_name}`,
+    html: emailLayout(
+      `Créez l’espace en ligne de ${r.mosque_name}`,
+      body,
+      { label: "Créer le compte de la mosquée", href: `${site.url}/creer-un-compte?${params}` },
+      { eyebrow: `Demande n°${r.number}`, preheader: "Suivez votre demande d’étude et votre projet solaire en ligne." },
+    ),
+  });
+  if (!sent) return { message: "L’envoi a échoué. Réessayez dans un instant." };
+  await logEvent(requestId, user.id, "account_invite", { to: r.email });
+  refresh();
+  return { ok: true, message: `Invitation envoyée à ${r.email}.` };
 }
 
 // --- Demandes de création de compte -------------------------------------------

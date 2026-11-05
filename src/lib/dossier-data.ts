@@ -108,6 +108,8 @@ export async function getDossierFiles(db: Db, requestId: string) {
     .from("request_files")
     .select("id, name, kind, created_at")
     .eq("request_id", requestId)
+    // L'étude reste côté équipe : elle est transmise à la mosquée par e-mail une fois relue.
+    .not("path", "like", "demandes/%/etude/%")
     .order("created_at");
   return (data ?? []) as DossierFile[];
 }

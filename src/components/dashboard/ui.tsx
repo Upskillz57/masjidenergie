@@ -3,7 +3,7 @@ import type { ReactNode, SVGProps } from "react";
 import { MobileMenu } from "@/components/dashboard/nav";
 import { LogoMark } from "@/components/logo";
 import { ThemeToggle } from "@/components/theme-toggle";
-import { STATUS_META, type RequestStatus } from "@/lib/workflow";
+import { STATUS_META, type AccountState, type RequestStatus } from "@/lib/workflow";
 
 // --- Icônes (trait 1.8, 24×24) ------------------------------------------------
 
@@ -175,6 +175,27 @@ export function StatusBadge({ status }: { status: RequestStatus }) {
       className={`inline-flex items-center gap-1.5 whitespace-nowrap rounded-full px-2.5 py-1 text-[12px] font-semibold ${meta.badge}`}
     >
       {meta.label}
+    </span>
+  );
+}
+
+/** Mosquée sans espace en ligne (ou demande de compte en attente). */
+export function AccountBadge({ state, compact = false }: { state: Exclude<AccountState, "compte">; compact?: boolean }) {
+  const label = state === "demande" ? "Compte demandé" : "Sans compte";
+  const title =
+    state === "demande" ? "Demande de compte en attente de validation" : "Cette mosquée n’a pas encore de compte Masjid Energie";
+  return (
+    <span
+      title={title}
+      aria-label={compact ? title : undefined}
+      className={`inline-flex items-center gap-1 whitespace-nowrap rounded-full font-semibold ${
+        state === "demande"
+          ? "bg-sky-100 text-sky-800 dark:bg-sky-400/15 dark:text-sky-300"
+          : "bg-amber-100 text-amber-800 dark:bg-amber-400/15 dark:text-amber-300"
+      } ${compact ? "px-1.5 py-0.5 text-[11px]" : "px-2.5 py-1 text-[12px]"}`}
+    >
+      <Icon name="userPlus" className={compact ? "size-3" : "size-3.5"} />
+      {label}
     </span>
   );
 }
