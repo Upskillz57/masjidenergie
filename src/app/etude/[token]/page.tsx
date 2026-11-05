@@ -3,13 +3,13 @@ import Link from "next/link";
 import { connection } from "next/server";
 import { Suspense } from "react";
 import { StudyUploadForm } from "@/components/admin/study-upload-form";
-import { Card, ghostButtonClass, Icon } from "@/components/dashboard/ui";
+import { Card, Icon } from "@/components/dashboard/ui";
 import { LogoMark } from "@/components/logo";
-import { FILE_KIND_LABEL, isFileKind, MOTIVATIONS, isMotivation } from "@/lib/dossier";
+import { MOTIVATIONS, isMotivation } from "@/lib/dossier";
 import { site } from "@/lib/site";
 import { verifyStudyToken } from "@/lib/study-link";
 import { createAdminClient, isSupabaseConfigured } from "@/lib/supabase/server";
-import { formatDate, formatSize, isStudyPath } from "@/lib/workflow";
+import { formatDate, isStudyPath } from "@/lib/workflow";
 
 export const metadata: Metadata = { title: "Demande d’étude", robots: { index: false, follow: false } };
 
@@ -27,7 +27,6 @@ type Req = {
   project_motivations: string[] | null;
   project_context: string | null;
 };
-type DossierFile = { id: string; path: string; name: string; size: number; mime: string | null; kind: string };
 
 function Shell({ children, number }: { children: React.ReactNode; number?: number }) {
   return (
@@ -57,15 +56,15 @@ async function StudyRequest({ params }: { params: Promise<{ token: string }> }) 
   const requestId = verifyStudyToken(token);
 
   let req: Req | null = null;
-  let files: DossierFile[] = [];
+  let studyCount = 0;
   if (requestId && isSupabaseConfigured) {
     const db = createAdminClient();
     const [r, f] = await Promise.all([
       db.from("study_requests").select("*").eq("id", requestId).maybeSingle<Req>(),
-      db.from("request_files").select("id, path, name, size, mime, kind").eq("request_id", requestId).order("created_at"),
+      db.from("request_files").select("path").eq("request_id", requestId),
     ]);
     req = r.data;
-    files = (f.data ?? []) as DossierFile[];
+    studyCount = (f.data ?? []).filter((x) => isStudyPath(x.path)).length;
   }
 
   if (!requestId || !req) {
@@ -88,9 +87,6 @@ async function StudyRequest({ params }: { params: Promise<{ token: string }> }) 
     );
   }
 
-  const dossier = files.filter((f) => !isStudyPath(f.path));
-  const studyCount = files.length - dossier.length;
-  const base = `/etude/${encodeURIComponent(token)}/telecharger`;
   const motivations = (req.project_motivations ?? []).filter(isMotivation).map((m) => MOTIVATIONS[m]);
   const mapUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`${req.mosque_name} ${req.mosque_address ?? ""}`)}`;
 
@@ -132,110 +128,40 @@ async function StudyRequest({ params }: { params: Promise<{ token: string }> }) 
 
   return (
     <Shell number={req.number}>
-      <div className="mb-8 grid gap-3">
+      <div className="mb-7 grid gap-2">
         <span className="text-[12px] font-semibold tracking-[0.22em] text-gold">
           DEMANDE D’ÉTUDE N°{req.number} · REÇUE LE {formatDate(req.created_at).toUpperCase()}
         </span>
         <h1 className="text-[clamp(26px,3vw,36px)] font-extrabold leading-tight tracking-[-0.02em] text-heading">
-          {req.mosque_name}
+          Étude pour {req.mosque_name}
         </h1>
         <p className="max-w-[720px] text-[15.5px] leading-relaxed text-muted">
-          Consultez la demande et ses documents ci-dessous, puis déposez votre étude en bas de page : elle arrivera directement
-          sur la demande de la mosquée, chez l’équipe Masjid Energie.
+          Les documents de la mosquée sont joints à l’e-mail reçu. Déposez ici votre étude : elle arrivera directement sur la
+          demande, chez l’équipe Masjid Energie.
         </p>
-        <div className="mt-1 flex flex-wrap gap-2">
-          <a
-            href="#deposer"
-            className="inline-flex h-10 items-center gap-2 rounded-lg bg-brand px-4 text-[14px] font-semibold text-white hover:bg-brand-hover"
-          >
-            <Icon name="upload" className="size-4" /> Déposer l’étude
-          </a>
-          {dossier.length > 0 && (
-            <a href={base} className={ghostButtonClass}>
-              <Icon name="download" className="size-4" /> Télécharger le dossier ({dossier.length})
-            </a>
-          )}
-        </div>
       </div>
 
-      <div className="grid items-start gap-6 lg:grid-cols-2">
-        <Card title="La demande" icon="pin">
+      <div className="grid items-start gap-6 lg:grid-cols-[minmax(0,5fr)_minmax(0,7fr)]">
+        <Card title="La mosquée" icon="pin">
           <dl className="grid divide-y divide-line text-[14.5px]">
             {rows.map(([k, v]) => (
-              <div key={k} className="grid gap-1 py-3 first:pt-0 last:pb-0 sm:grid-cols-[150px_minmax(0,1fr)] sm:gap-4">
-                <dt className="text-[13px] font-semibold text-muted">{k}</dt>
+              <div key={k} className="grid gap-1 py-3 first:pt-0 last:pb-0">
+                <dt className="text-[12px] font-semibold uppercase tracking-[0.08em] text-muted">{k}</dt>
                 <dd className="whitespace-pre-line text-fg">{v}</dd>
               </div>
             ))}
           </dl>
         </Card>
 
-        <Card
-          title={`Documents de la mosquée (${dossier.length})`}
-          icon="clip"
-          actions={
-            dossier.length > 1 && (
-              <a href={base} className={`${ghostButtonClass} h-8 px-3 text-[13px]`}>
-                <Icon name="download" className="size-4" /> Tout (ZIP)
-              </a>
-            )
-          }
-        >
-          {dossier.length === 0 ? (
-            <p className="text-[14px] text-muted">Aucun document n’a encore été joint à cette demande.</p>
-          ) : (
-            <ul className="grid gap-2">
-              {dossier.map((f) => (
-                <li key={f.id} className="flex items-center gap-3 rounded-lg border border-line px-3 py-2.5">
-                  <span className="flex size-9 flex-none items-center justify-center rounded-md bg-brand/10 text-[10.5px] font-bold text-brand-text">
-                    {f.mime === "application/pdf" ? "PDF" : f.mime?.startsWith("image/") ? "IMG" : "DOC"}
-                  </span>
-                  <span className="grid min-w-0 flex-1 text-[13.5px] leading-tight">
-                    <a
-                      href={`${base}?f=${f.id}&voir=1`}
-                      target="_blank"
-                      rel="noreferrer"
-                      className="truncate font-medium text-fg hover:text-brand-text hover:underline"
-                    >
-                      {f.name}
-                    </a>
-                    <span className="text-muted">
-                      {isFileKind(f.kind) ? FILE_KIND_LABEL[f.kind] : "Document"} · {formatSize(f.size)}
-                    </span>
-                  </span>
-                  <a
-                    href={`${base}?f=${f.id}&voir=1`}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="hidden h-8 items-center rounded-md px-2.5 text-[13px] font-semibold text-brand-text hover:bg-bg-soft sm:inline-flex"
-                  >
-                    Voir
-                  </a>
-                  <a
-                    href={`${base}?f=${f.id}`}
-                    aria-label={`Télécharger ${f.name}`}
-                    title="Télécharger"
-                    className="flex size-8 flex-none items-center justify-center rounded-md text-muted hover:bg-bg-soft hover:text-brand-text"
-                  >
-                    <Icon name="download" className="size-4" />
-                  </a>
-                </li>
-              ))}
-            </ul>
-          )}
-        </Card>
-      </div>
-
-      <section id="deposer" className="mt-6 scroll-mt-6">
         <Card title="Déposer l’étude" icon="upload">
-          <p className="mb-5 text-[14px] leading-relaxed text-muted">
-            Rapport, simulation de production, devis… Les documents arrivent directement sur la demande de la mosquée.
-            {studyCount > 0 &&
-              ` ${studyCount} document${studyCount > 1 ? "s" : ""} d’étude déjà reçu${studyCount > 1 ? "s" : ""}.`}
-          </p>
+          {studyCount > 0 && (
+            <p className="mb-4 rounded-lg bg-bg-soft px-3 py-2 text-[13.5px] text-muted">
+              {studyCount} document{studyCount > 1 ? "s" : ""} d’étude déjà reçu{studyCount > 1 ? "s" : ""} pour cette demande.
+            </p>
+          )}
           <StudyUploadForm token={token} />
         </Card>
-      </section>
+      </div>
     </Shell>
   );
 }

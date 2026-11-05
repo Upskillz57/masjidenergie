@@ -70,6 +70,7 @@ const requests: (RequestRow & {
       mosque_id: null,
       // Démo : les projets avancés ont un compte, une demande de compte attend pour la n°107.
       account: (["signee", "installee", "etude_envoyee"].includes(status) ? "compte" : i === 1 ? "demande" : "aucun") as AccountState,
+      studyFiles: ["etude_envoyee", "signee", "installee"].includes(status) ? 1 : 0,
       assigned_to: assignee?.id ?? null,
       assignee,
       request_files: [{ count: files }],

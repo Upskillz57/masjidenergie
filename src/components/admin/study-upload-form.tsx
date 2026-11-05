@@ -18,6 +18,8 @@ export function StudyUploadForm({ token, staff = false }: { token: string; staff
   const [files, setFiles] = useState<File[]>([]);
   const [busy, setBusy] = useState<string | null>(null);
   const [result, setResult] = useState<{ ok: boolean; message: string } | null>(null);
+  const [dragging, setDragging] = useState(false);
+  const addFiles = (picked: File[]) => setFiles((prev) => [...prev, ...picked].slice(0, 10));
 
   async function submit(fd: FormData) {
     setResult(null);
@@ -35,7 +37,7 @@ export function StudyUploadForm({ token, staff = false }: { token: string; staff
     const failed = await uploadSigned(prep.uploads, files);
     setBusy("Enregistrement…");
     const done = await finalizeStudyUpload(token, {
-      name: String(fd.get("name") ?? ""),
+      name: [fd.get("firstName"), fd.get("lastName")].map((v) => String(v ?? "").trim()).filter(Boolean).join(" "),
       company: String(fd.get("company") ?? ""),
       note: String(fd.get("note") ?? ""),
     });
@@ -72,10 +74,14 @@ export function StudyUploadForm({ token, staff = false }: { token: string; staff
       {!staff && (
         <div className="grid gap-3 sm:grid-cols-2">
           <label className="grid gap-1.5 text-[13.5px] font-semibold text-fg">
-            Votre nom
-            <input name="name" required autoComplete="name" className={inputClass} />
+            Prénom
+            <input name="firstName" required autoComplete="given-name" className={inputClass} />
           </label>
           <label className="grid gap-1.5 text-[13.5px] font-semibold text-fg">
+            Nom
+            <input name="lastName" required autoComplete="family-name" className={inputClass} />
+          </label>
+          <label className="grid gap-1.5 text-[13.5px] font-semibold text-fg sm:col-span-2">
             <span>
               Société <span className="font-normal text-muted">(facultatif)</span>
             </span>
@@ -84,10 +90,28 @@ export function StudyUploadForm({ token, staff = false }: { token: string; staff
         </div>
       )}
 
-      <label className="grid cursor-pointer justify-items-center gap-2 rounded-xl border-2 border-dashed border-line bg-bg-soft px-4 py-6 text-center hover:border-brand-text/50">
+      <label
+        onDragOver={(e) => {
+          e.preventDefault();
+          setDragging(true);
+        }}
+        onDragLeave={() => setDragging(false)}
+        onDrop={(e) => {
+          e.preventDefault();
+          setDragging(false);
+          addFiles([...e.dataTransfer.files]);
+        }}
+        className={`grid cursor-pointer justify-items-center gap-2 rounded-xl border-2 border-dashed px-4 py-7 text-center transition-colors ${
+          dragging ? "border-brand-text bg-brand/10" : "border-line bg-bg-soft hover:border-brand-text/50"
+        }`}
+      >
         <Icon name="upload" className="size-7 text-brand-text" />
         <span className="text-[14.5px] font-semibold text-heading">
-          {files.length ? "Ajouter d’autres documents" : "Choisir les documents de l’étude"}
+          {dragging
+            ? "Déposez les documents ici"
+            : files.length
+              ? "Ajouter d’autres documents"
+              : "Glissez les documents de l’étude ici, ou cliquez pour les choisir"}
         </span>
         <span className="text-[12.5px] text-muted">PDF ou images · 20 Mo maximum par document · 10 documents au plus</span>
         <input
@@ -96,8 +120,7 @@ export function StudyUploadForm({ token, staff = false }: { token: string; staff
           accept={FILE_ACCEPT}
           className="sr-only"
           onChange={(e) => {
-            const picked = [...(e.currentTarget.files ?? [])];
-            setFiles((prev) => [...prev, ...picked].slice(0, 10));
+            addFiles([...(e.currentTarget.files ?? [])]);
             e.currentTarget.value = "";
           }}
         />

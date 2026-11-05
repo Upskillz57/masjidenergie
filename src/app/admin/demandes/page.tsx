@@ -121,14 +121,16 @@ export default async function RequestsPage({ searchParams }: { searchParams: Sea
                 <th className="px-5 py-3">Mosquée</th>
                 <th className="px-3 py-3">Contact</th>
                 <th className="px-3 py-3">Infos</th>
-                <th className="px-3 py-3">Assignée à</th>
                 <th className="px-3 py-3">Reçue le</th>
-                <th className="px-5 py-3 text-right">Statut</th>
+                <th className="px-3 py-3">Assignée à</th>
+                <th className="px-3 py-3">Statut</th>
+                <th className="px-3 py-3 leading-tight">Partager la demande</th>
+                <th className="px-5 py-3 leading-tight">Partager l’étude</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-line">
               {rows.map((r) => {
-                const files = r.request_files[0]?.count ?? 0;
+                const files = (r.request_files[0]?.count ?? 0) - r.studyFiles;
                 return (
                   <tr key={r.id} className="relative grid gap-1.5 px-5 py-4 hover:bg-bg-soft md:table-row md:p-0">
                     <td className="md:px-5 md:py-3.5">
@@ -167,23 +169,49 @@ export default async function RequestsPage({ searchParams }: { searchParams: Sea
                             <Icon name="plug" className="size-3.5" /> Bornes
                           </span>
                         )}
+                        {r.studyFiles > 0 && (
+                          <span
+                            title={`${r.studyFiles} document${r.studyFiles > 1 ? "s" : ""} d’étude reçu${r.studyFiles > 1 ? "s" : ""}`}
+                            className="flex items-center gap-1 whitespace-nowrap rounded-full bg-emerald-100 px-2 py-0.5 font-semibold text-emerald-800 dark:bg-emerald-400/15 dark:text-emerald-300"
+                          >
+                            <Icon name="check" className="size-3.5" /> Étude reçue
+                          </span>
+                        )}
                       </span>
                     </td>
+                    <td className="whitespace-nowrap text-[13.5px] text-muted md:px-3 md:py-3.5">{formatDate(r.created_at)}</td>
                     <td className="text-[13.5px] text-muted md:px-3 md:py-3.5">
                       {r.assignee ? r.assignee.full_name || r.assignee.email : <span className="italic">Non assignée</span>}
                     </td>
-                    <td className="whitespace-nowrap text-[13.5px] text-muted md:px-3 md:py-3.5">{formatDate(r.created_at)}</td>
-                    <td className="md:px-5 md:py-3.5">
-                      <span className="relative z-10 flex items-center gap-1.5 md:justify-end">
-                        <StatusSelect id={r.id} status={r.status} />
+                    <td className="md:px-3 md:py-3.5">
+                      <StatusSelect id={r.id} status={r.status} />
+                    </td>
+                    <td className="md:px-3 md:py-3.5">
+                      <span className="relative z-10 inline-flex">
                         <ShareButton
                           requestId={r.id}
-                          label={`Partager la demande de ${r.mosque_name}`}
-                          className="flex size-8 flex-none cursor-pointer items-center justify-center rounded-md text-muted hover:bg-card hover:text-brand-text"
+                          label={`Partager la demande de ${r.mosque_name} par e-mail`}
+                          className="inline-flex h-8 cursor-pointer items-center gap-1.5 whitespace-nowrap rounded-lg border border-line bg-card px-2.5 text-[13px] font-semibold text-fg hover:border-brand-text/40 hover:text-brand-text"
                         >
-                          <Icon name="share" className="size-4" />
+                          <Icon name="share" className="size-4" /> Demande
                         </ShareButton>
                       </span>
+                    </td>
+                    <td className="md:px-5 md:py-3.5">
+                      {r.studyFiles > 0 ? (
+                        <span className="relative z-10 inline-flex">
+                          <ShareButton
+                            mode="study"
+                            requestId={r.id}
+                            label={`Envoyer l’étude à ${r.mosque_name} par e-mail`}
+                            className="inline-flex h-8 cursor-pointer items-center gap-1.5 whitespace-nowrap rounded-lg bg-emerald-100 px-2.5 text-[13px] font-semibold text-emerald-800 hover:bg-emerald-200 dark:bg-emerald-400/15 dark:text-emerald-300 dark:hover:bg-emerald-400/25"
+                          >
+                            <Icon name="mail" className="size-4" /> Étude
+                          </ShareButton>
+                        </span>
+                      ) : (
+                        <span className="hidden text-[13px] italic text-muted md:inline">En attente</span>
+                      )}
                     </td>
                   </tr>
                 );

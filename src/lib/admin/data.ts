@@ -35,6 +35,8 @@ export type RequestRow = {
   request_files: { count: number }[];
   mosque_id: string | null;
   account: AccountState;
+  /** Nombre de documents de l'étude réalisée déjà reçus. */
+  studyFiles: number;
 };
 
 type Db = ReturnType<typeof createAdminClient>;
@@ -85,7 +87,7 @@ export async function listRequests(filters: RequestFilters) {
   }
 
   const [{ data: rows, error }, { data: all }] = await Promise.all([
-    query.returns<Omit<RequestRow, "account">[]>(),
+    query.returns<Omit<RequestRow, "account" | "studyFiles">[]>(),
     db.from("study_requests").select("status"),
   ]);
   if (error) throw error;
@@ -93,8 +95,21 @@ export async function listRequests(filters: RequestFilters) {
   const counts = Object.fromEntries(REQUEST_STATUSES.map((s) => [s, 0])) as Record<RequestStatus, number>;
   for (const r of all ?? []) if (isRequestStatus(r.status)) counts[r.status]++;
 
-  const account = await accountStates(db, rows ?? []);
-  return { rows: (rows ?? []).map((r) => ({ ...r, account: account(r) })), counts, total: all?.length ?? 0, user };
+  const ids = (rows ?? []).map((r) => r.id);
+  const [account, { data: studies }] = await Promise.all([
+    accountStates(db, rows ?? []),
+    ids.length
+      ? db.from("request_files").select("request_id").in("request_id", ids).like("path", "demandes/%/etude/%")
+      : Promise.resolve({ data: [] as { request_id: string }[] }),
+  ]);
+  const studyCount = new Map<string, number>();
+  for (const f of studies ?? []) studyCount.set(f.request_id, (studyCount.get(f.request_id) ?? 0) + 1);
+  return {
+    rows: (rows ?? []).map((r) => ({ ...r, account: account(r), studyFiles: studyCount.get(r.id) ?? 0 })),
+    counts,
+    total: all?.length ?? 0,
+    user,
+  };
 }
 
 export type RequestFile = {
@@ -143,7 +158,7 @@ export async function getRequest(id: string) {
   return {
     user,
     account: (await accountStates(db, [req.data]))(req.data),
-    request: req.data as Omit<RequestRow, "assignee" | "request_files" | "account"> & {
+    request: req.data as Omit<RequestRow, "assignee" | "request_files" | "account" | "studyFiles"> & {
       mosque_osm: string | null;
       message: string | null;
       project_motivations: string[];

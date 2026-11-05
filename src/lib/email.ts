@@ -43,7 +43,7 @@ export function emailLayout(
 ) {
   const logo = `${site.url}/brand/email/logo-email.png`;
   const button = cta
-    ? `<table role="presentation" cellpadding="0" cellspacing="0" style="margin:28px 0 8px"><tr><td style="border-radius:10px;background:${C.gold}"><a href="${escapeHtml(cta.href)}" style="display:inline-block;padding:14px 26px;font:700 15px/1 ${FONT};color:${C.deep};text-decoration:none;border-radius:10px">${escapeHtml(cta.label)} &rarr;</a></td></tr></table>`
+    ? `<table role="presentation" cellpadding="0" cellspacing="0" style="margin:28px 0 8px"><tr><td style="border-radius:10px;background:${C.gold}"><a href="${escapeHtml(cta.href)}" target="_blank" rel="noopener" style="display:inline-block;padding:14px 26px;font:700 15px/1 ${FONT};color:${C.deep};text-decoration:none;border-radius:10px">${escapeHtml(cta.label)} &rarr;</a></td></tr></table>`
     : "";
   const eyebrow = opts.eyebrow
     ? `<p style="margin:0 0 8px;font:700 11.5px/1 ${FONT};letter-spacing:.22em;text-transform:uppercase;color:${C.gold}">${escapeHtml(opts.eyebrow)}</p>`
