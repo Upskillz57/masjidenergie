@@ -11,11 +11,14 @@ import { AutoSubmitSelect, ConfirmButton, CopyLinkButton, InviteAccountForm, Sub
 import { RequestFiles } from "@/components/admin/request-files";
 import { ShareButton } from "@/components/admin/share-dialog";
 import { StudyUploadForm } from "@/components/admin/study-upload-form";
+import { RequestTasks } from "@/components/admin/workspace/request-tasks";
 import { DossierChecklist, ProjectContextForm } from "@/components/dossier/dossier";
 import { AccountBadge, buttonClass, Card, ghostButtonClass, Icon, inputClass, StatusBadge } from "@/components/dashboard/ui";
 import { getRequest } from "@/lib/admin/data";
+import { listRequestTasks } from "@/lib/admin/tasks-data";
 import { dossierPieces, FILE_KIND_LABEL, FILE_KINDS, missingPieces } from "@/lib/dossier";
 import { createStudyToken, studyUploadUrl } from "@/lib/study-link";
+import { todayISO } from "@/lib/tasks";
 import {
   formatDate,
   formatDateTime,
@@ -53,6 +56,10 @@ function eventLabel(type: string, data: Record<string, string | number | null | 
       return `Étude déposée par ${data.by}${data.company ? ` (${data.company})` : ""}${Number(data.files) ? ` : ${data.names}` : ""}`;
     case "account_invite":
       return `Invitation à créer un compte envoyée à ${data.to}`;
+    case "task_added":
+      return `Tâche ajoutée : ${data.title}`;
+    case "task_done":
+      return `Tâche terminée : ${data.title}`;
     default:
       return type;
   }
@@ -60,8 +67,9 @@ function eventLabel(type: string, data: Record<string, string | number | null | 
 
 export default async function RequestDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
-  const detail = await getRequest(id);
+  const [detail, tasks] = await Promise.all([getRequest(id), listRequestTasks(id)]);
   if (!detail) notFound();
+  const openTasks = tasks.filter((t) => t.status !== "termine").length;
   const { request: r, files, comments, events, staff, user, linky, account } = detail;
   const requestFiles = files.filter((f) => !f.study);
   const studyFiles = files.filter((f) => f.study);
@@ -401,6 +409,21 @@ export default async function RequestDetailPage({ params }: { params: Promise<{ 
                 </a>
               </div>
             </div>
+          </Card>
+
+          <Card
+            title={`Tâches${openTasks ? ` (${openTasks} à faire)` : ""}`}
+            icon="check"
+            actions={
+              <Link
+                href={`/admin/travail?demande=${r.id}&vue=calendrier`}
+                className="text-[12.5px] font-semibold text-brand-text hover:underline"
+              >
+                Calendrier
+              </Link>
+            }
+          >
+            <RequestTasks requestId={r.id} tasks={tasks} staff={staff} me={user.id} today={todayISO()} />
           </Card>
 
           <Card title="Historique" icon="clock">
