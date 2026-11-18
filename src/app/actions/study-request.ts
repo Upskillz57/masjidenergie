@@ -3,6 +3,7 @@
 import { dossierPieces, isMotivation, missingPieces, MOTIVATIONS, REQUIRED_BILLS, type Motivation } from "@/lib/dossier";
 import { declaredFilesError, parseDeclaredFiles, registerUploads, signUploads } from "@/lib/dossier-data";
 import { emailLayout, emailTable, sendEmail, teamInbox } from "@/lib/email";
+import { notifyStaff } from "@/lib/notify";
 import { site } from "@/lib/site";
 import { type StudyRequestState } from "@/lib/study";
 import { createAdminClient, isSupabaseConfigured } from "@/lib/supabase/server";
@@ -82,6 +83,12 @@ export async function submitStudyRequest(formData: FormData): Promise<StudyReque
       saved = row;
       uploads = await signUploads(db, row.id, declared);
       await db.from("request_events").insert({ request_id: row.id, type: "created", data: {} });
+      notifyStaff({
+        kind: "request_new",
+        title: `Nouvelle demande d’étude : ${data.mosqueName}`,
+        body: `n°${row.number} · ${data.firstName} ${data.lastName} · ${data.phone}${data.chargers ? " · bornes de recharge" : ""}`,
+        url: `/admin/demandes/${row.id}`,
+      });
     }
   }
 

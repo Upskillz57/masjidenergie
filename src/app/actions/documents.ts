@@ -6,6 +6,7 @@ import { isDocCategory, MAX_DOCUMENT_BYTES, validateLinky, type LinkyData, type 
 import { getFormTemplate } from "@/lib/documents-data";
 import { emailLayout, emailTable, escapeHtml, sendEmail, teamInbox } from "@/lib/email";
 import { fillLinkyPdf } from "@/lib/linky-pdf";
+import { notifyStaff } from "@/lib/notify";
 import { site } from "@/lib/site";
 import { createAdminClient, DOCUMENTS_BUCKET, isSupabaseConfigured } from "@/lib/supabase/server";
 
@@ -182,6 +183,14 @@ export async function submitLinky(_: LinkyState, fd: FormData): Promise<LinkySta
     .select("id")
     .single();
   if (error) return { message: "Enregistrement impossible. Réessayez." };
+
+  notifyStaff({
+    kind: "linky_signed",
+    title: `Autorisation Linky signée : ${data.tradeName}`,
+    body: `Signée par ${data.signerFirstName} ${data.signerLastName}`,
+    url: `/documents/formulaires/${row.id}?voir=1`,
+    actorId: user.id,
+  });
 
   await sendEmail({
     to: teamInbox(),

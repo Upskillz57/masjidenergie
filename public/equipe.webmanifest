@@ -1,0 +1,47 @@
+{
+  "id": "/admin/",
+  "name": "Masjid Energie · Équipe",
+  "short_name": "ME Équipe",
+  "description": "Espace de travail, demandes d’étude et notifications de l’équipe Masjid Energie",
+  "start_url": "/admin/travail?app=1",
+  "scope": "/admin/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#0a3d2e",
+  "theme_color": "#0a3d2e",
+  "lang": "fr",
+  "icons": [
+    {
+      "src": "/brand/icones/masjid-energie-icone-192px.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/brand/icones/masjid-energie-icone-512px.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/brand/icones/masjid-energie-icone-512px.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Espace de travail",
+      "url": "/admin/travail"
+    },
+    {
+      "name": "Notifications",
+      "url": "/admin/notifications"
+    },
+    {
+      "name": "Demandes d’étude",
+      "url": "/admin/demandes"
+    }
+  ]
+}

@@ -6,8 +6,10 @@ import { emailLayout, escapeHtml, sendEmail } from "@/lib/email";
 import { site } from "@/lib/site";
 import { requireAdmin, requireStaff } from "@/lib/auth";
 import { isFileKind } from "@/lib/dossier";
+import { mentionedIds } from "@/lib/notifications";
+import { notify } from "@/lib/notify";
 import { createAdminClient, DOCUMENTS_BUCKET, isSupabaseConfigured } from "@/lib/supabase/server";
-import { isRequestStatus, isStaffRole, ROLES, type Role } from "@/lib/workflow";
+import { isRequestStatus, isStaffRole, ROLES, STATUS_META, type Role } from "@/lib/workflow";
 
 export type ActionState = { ok?: boolean; message: string } | null;
 
@@ -19,6 +21,16 @@ const id = (fd: FormData, key = "id") => {
 
 // Mode démo (développement sans Supabase) : les actions ne modifient rien.
 const demoMessage: ActionState = { message: "Mode démo : configurez Supabase pour enregistrer les modifications." };
+
+/** Libellé d'une demande pour les notifications : « n°12 · Mosquée … ». */
+async function requestLabel(requestId: string) {
+  const { data } = await createAdminClient()
+    .from("study_requests")
+    .select("number, mosque_name, assigned_to")
+    .eq("id", requestId)
+    .maybeSingle();
+  return data ? { ...data, label: `n°${data.number} · ${data.mosque_name}` } : null;
+}
 
 const logEvent = (requestId: string, actorId: string, type: string, data: Record<string, unknown> = {}) =>
   createAdminClient().from("request_events").insert({ request_id: requestId, actor_id: actorId, type, data });
@@ -37,6 +49,15 @@ export async function updateRequestStatus(formData: FormData) {
   if (!before || before.status === status) return;
   await db.from("study_requests").update({ status }).eq("id", requestId);
   await logEvent(requestId, user.id, "status", { from: before.status, to: status });
+  const req = await requestLabel(requestId);
+  if (req)
+    notify([req.assigned_to], {
+      kind: "request_status",
+      title: `${req.mosque_name} : ${STATUS_META[status].label}`,
+      body: `Demande ${req.label} · statut changé par ${user.fullName || user.email}`,
+      url: `/admin/demandes/${requestId}`,
+      actorId: user.id,
+    });
   refresh();
 }
 
@@ -55,6 +76,17 @@ export async function assignRequest(formData: FormData) {
   }
   await db.from("study_requests").update({ assigned_to: assignee?.id ?? null }).eq("id", requestId);
   await logEvent(requestId, user.id, "assign", { to: assignee ? assignee.full_name || assignee.email : null });
+  const req = assignee ? await requestLabel(requestId) : null;
+  if (assignee && req)
+    notify([assignee.id], {
+      kind: "request_assigned",
+      title: `${user.fullName || user.email} vous a assigné la demande ${req.label}`,
+      body: "Vous êtes maintenant la personne en charge de ce dossier.",
+      url: `/admin/demandes/${requestId}`,
+      actorId: user.id,
+      email: true,
+      cta: "Ouvrir la demande",
+    });
   refresh();
 }
 
@@ -64,7 +96,33 @@ export async function addComment(formData: FormData) {
   const requestId = id(formData);
   const body = String(formData.get("body") ?? "").trim().slice(0, 5000);
   if (!body) return;
-  await createAdminClient().from("request_comments").insert({ request_id: requestId, author_id: user.id, body });
+  const db = createAdminClient();
+  await db.from("request_comments").insert({ request_id: requestId, author_id: user.id, body });
+
+  // Personnes citées avec « @prénom », puis la personne en charge et celles qui ont déjà commenté.
+  const [req, { data: past }, { data: staff }] = await Promise.all([
+    requestLabel(requestId),
+    db.from("request_comments").select("author_id").eq("request_id", requestId),
+    db.from("profiles").select("id, full_name, email").in("role", ["admin", "equipe", "technique"]),
+  ]);
+  if (req) {
+    const by = user.fullName || user.email;
+    const url = `/admin/demandes/${requestId}`;
+    const mentioned = mentionedIds(body, staff ?? []).filter((m) => m !== user.id);
+    notify(mentioned, {
+      kind: "request_mention",
+      title: `${by} vous a mentionné · ${req.label}`,
+      body,
+      url,
+      actorId: user.id,
+      email: true,
+      cta: "Voir la demande",
+    });
+    notify(
+      [req.assigned_to, ...(past ?? []).map((c) => c.author_id)].filter((m) => m && !mentioned.includes(m)),
+      { kind: "request_comment", title: `${by} · ${req.label}`, body, url, actorId: user.id, email: true, cta: "Voir la demande" },
+    );
+  }
   refresh();
 }
 

@@ -4,6 +4,7 @@ import { refresh } from "next/cache";
 import { requireUser, type CurrentUser } from "@/lib/auth";
 import { isMotivation, type SignedUpload } from "@/lib/dossier";
 import { declaredFilesError, parseDeclaredFiles, registerUploads, signUploads } from "@/lib/dossier-data";
+import { notifyRequestOwner } from "@/lib/notify";
 import { createAdminClient, isSupabaseConfigured } from "@/lib/supabase/server";
 import { isStaffRole } from "@/lib/workflow";
 
@@ -33,6 +34,22 @@ export async function completeDossierUpload(requestId: string) {
   const user = await requireUser("/espace/projet");
   if (!(await canEdit(user, requestId))) return;
   await registerUploads(createAdminClient(), requestId, user.id);
+  // Pièces ajoutées par la mosquée depuis son espace : la personne en charge du dossier est prévenue.
+  if (!isStaffRole(user.role)) {
+    const { data: req } = await createAdminClient()
+      .from("study_requests")
+      .select("number, mosque_name")
+      .eq("id", requestId)
+      .maybeSingle();
+    if (req)
+      await notifyRequestOwner(requestId, {
+        kind: "request_documents",
+        title: `Nouveaux documents : ${req.mosque_name}`,
+        body: `La mosquée a complété son dossier (demande n°${req.number}).`,
+        url: `/admin/demandes/${requestId}`,
+        actorId: user.id,
+      });
+  }
   refresh();
 }
 

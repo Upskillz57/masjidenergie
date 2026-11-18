@@ -2,8 +2,8 @@
 
 import { refresh } from "next/cache";
 import { requireStaff, type CurrentUser } from "@/lib/auth";
-import { emailLayout, escapeHtml, sendEmail } from "@/lib/email";
-import { site } from "@/lib/site";
+import { mentionedIds } from "@/lib/notifications";
+import { notify } from "@/lib/notify";
 import { createAdminClient, isSupabaseConfigured } from "@/lib/supabase/server";
 import { isDay, isTaskPriority, isTaskStatus, type TaskComment, type TaskPatch } from "@/lib/tasks";
 import { isStaffRole } from "@/lib/workflow";
@@ -46,37 +46,41 @@ const logRequest = async (db: Db, requestId: string | null, actorId: string, typ
   if (requestId) await db.from("request_events").insert({ request_id: requestId, actor_id: actorId, type, data: { title } });
 };
 
+/** Contexte d'une tâche pour le texte des notifications : demande liée et échéance. */
+async function taskContext(db: Db, taskId: string) {
+  const { data } = await db
+    .from("tasks")
+    .select("title, due_date, assigned_to, created_by, request:study_requests(number, mosque_name)")
+    .eq("id", taskId)
+    .maybeSingle();
+  if (!data) return null;
+  const request = data.request as unknown as { number: number; mosque_name: string } | null;
+  const due = data.due_date
+    ? new Intl.DateTimeFormat("fr-FR", { weekday: "long", day: "numeric", month: "long", timeZone: "UTC" }).format(
+        new Date(`${data.due_date}T00:00:00Z`),
+      )
+    : null;
+  return {
+    ...data,
+    where: [request && `Demande n°${request.number} · ${request.mosque_name}`, due && `pour le ${due}`]
+      .filter(Boolean)
+      .join(" · "),
+  };
+}
+
 /** Prévient la personne à qui l'on confie une tâche (sauf si elle se l'assigne elle-même). */
 async function notifyAssignee(db: Db, user: CurrentUser, taskId: string, assigneeId: string | null) {
   if (!assigneeId || assigneeId === user.id) return;
-  const [{ data: person }, { data: task }] = await Promise.all([
-    db.from("profiles").select("email, full_name").eq("id", assigneeId).maybeSingle(),
-    db.from("tasks").select("title, due_date, request:study_requests(number, mosque_name)").eq("id", taskId).maybeSingle(),
-  ]);
-  if (!person || !task) return;
-  const request = task.request as unknown as { number: number; mosque_name: string } | null;
-  const p = (t: string) => `<p style="margin:0 0 14px">${t}</p>`;
-  const due = task.due_date
-    ? new Intl.DateTimeFormat("fr-FR", { weekday: "long", day: "numeric", month: "long", timeZone: "UTC" }).format(
-        new Date(`${task.due_date}T00:00:00Z`),
-      )
-    : null;
-  const by = user.fullName || user.email;
-  await sendEmail({
-    to: [person.email],
-    replyTo: user.email,
-    subject: `Nouvelle tâche : ${task.title}`,
-    html: emailLayout(
-      task.title,
-      [
-        p(`${escapeHtml(by)} vous a confié une tâche dans l’espace de travail.`),
-        p(
-          `<strong>${escapeHtml(task.title)}</strong>${request ? `<br>Demande n°${request.number} · ${escapeHtml(request.mosque_name)}` : ""}${due ? `<br>À faire pour le ${due}` : ""}`,
-        ),
-      ].join(""),
-      { label: "Ouvrir la tâche", href: `${site.url}/admin/travail?tache=${taskId}` },
-      { eyebrow: "Espace de travail", preheader: `${by} vous a confié une tâche.` },
-    ),
+  const task = await taskContext(db, taskId);
+  if (!task) return;
+  notify([assigneeId], {
+    kind: "task_assigned",
+    title: `${user.fullName || user.email} vous a confié : ${task.title}`,
+    body: task.where || null,
+    url: `/admin/travail?tache=${taskId}`,
+    actorId: user.id,
+    email: true,
+    cta: "Ouvrir la tâche",
   });
 }
 
@@ -134,8 +138,19 @@ export async function updateTask(id: string, patch: TaskPatch): Promise<TaskResu
   const { error } = await db.from("tasks").update(row).eq("id", id);
   if (error) return fail("Impossible d’enregistrer la modification.");
 
-  if (row.status === "termine" && before.status !== "termine")
+  if (row.status === "termine" && before.status !== "termine") {
     await logRequest(db, row.request_id ?? before.request_id, user.id, "task_done", row.title ?? before.title);
+    // Le créateur (et la personne assignée, si quelqu'un d'autre l'a terminée) apprend que c'est fait.
+    const task = await taskContext(db, id);
+    if (task)
+      notify([task.created_by, task.assigned_to], {
+        kind: "task_done",
+        title: `${user.fullName || user.email} a terminé : ${task.title}`,
+        body: task.where || null,
+        url: `/admin/travail?tache=${id}`,
+        actorId: user.id,
+      });
+  }
   if ("assigned_to" in row && row.assigned_to !== before.assigned_to) await notifyAssignee(db, user, id, row.assigned_to);
   refresh();
   return { ok: true };
@@ -184,8 +199,47 @@ export async function addTaskComment(taskId: string, body: string): Promise<Task
     .select("id, created_at")
     .single();
   if (error) return null;
+  await notifyTaskComment(user, taskId, text);
   refresh();
   return { ...comment, ...data };
+}
+
+/**
+ * Nouveau message : les personnes citées avec « @prénom » sont prévenues en priorité,
+ * puis celles qui suivent la tâche (assignée, créatrice, participants à la discussion).
+ */
+async function notifyTaskComment(user: CurrentUser, taskId: string, text: string) {
+  const db = createAdminClient();
+  const [task, { data: past }, { data: staff }] = await Promise.all([
+    taskContext(db, taskId),
+    db.from("task_comments").select("author_id").eq("task_id", taskId),
+    db.from("profiles").select("id, full_name, email").in("role", ["admin", "equipe", "technique"]),
+  ]);
+  if (!task) return;
+  const by = user.fullName || user.email;
+  const url = `/admin/travail?tache=${taskId}`;
+  const mentioned = mentionedIds(text, staff ?? []).filter((id) => id !== user.id);
+  notify(mentioned, {
+    kind: "task_mention",
+    title: `${by} vous a mentionné · ${task.title}`,
+    body: text,
+    url,
+    actorId: user.id,
+    email: true,
+    cta: "Répondre",
+  });
+  const followers = [task.assigned_to, task.created_by, ...(past ?? []).map((c) => c.author_id)].filter(
+    (id) => id && !mentioned.includes(id),
+  );
+  notify(followers, {
+    kind: "task_comment",
+    title: `${by} · ${task.title}`,
+    body: text,
+    url,
+    actorId: user.id,
+    email: true,
+    cta: "Répondre",
+  });
 }
 
 export async function deleteTaskComment(commentId: string): Promise<TaskResult> {

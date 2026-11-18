@@ -1,6 +1,7 @@
 "use server";
 
 import { emailLayout, emailTable, sendEmail, teamInbox } from "@/lib/email";
+import { notifyStaff } from "@/lib/notify";
 import { site } from "@/lib/site";
 import { createAdminClient, isSupabaseConfigured } from "@/lib/supabase/server";
 
@@ -51,6 +52,13 @@ export async function submitAccountRequest(_: AccountRequestState, formData: For
     console.error("[demande de compte] insertion impossible", error);
     return { ok: false, message: `L’envoi a échoué. Réessayez ou appelez-nous au ${site.contact.phone}.` };
   }
+
+  notifyStaff({
+    kind: "account_request",
+    title: `Demande de compte : ${data.mosque_name}`,
+    body: `${data.first_name} ${data.last_name} · ${data.phone} · à valider`,
+    url: "/admin/comptes",
+  });
 
   await sendEmail({
     to: teamInbox(),

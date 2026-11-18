@@ -4,6 +4,7 @@ import { refresh } from "next/cache";
 import { getCurrentUser } from "@/lib/auth";
 import { MAX_FILE_BYTES, type SignedUpload } from "@/lib/dossier";
 import { emailLayout, emailTable, sendEmail, teamInbox } from "@/lib/email";
+import { notifyRequestOwner } from "@/lib/notify";
 import { site } from "@/lib/site";
 import { verifyStudyToken } from "@/lib/study-link";
 import { createAdminClient, DOCUMENTS_BUCKET, isSupabaseConfigured } from "@/lib/supabase/server";
@@ -95,6 +96,14 @@ export async function finalizeStudyUpload(
     actor_id: staff?.id ?? null,
     type: "study_uploaded",
     data: { by, company: company || null, names: names.join(", "), files: names.length, note: note || null },
+  });
+
+  await notifyRequestOwner(requestId, {
+    kind: "study_received",
+    title: `Étude reçue : ${req.mosque_name}`,
+    body: `${names.length} document${names.length > 1 ? "s" : ""} déposé${names.length > 1 ? "s" : ""} par ${company ? `${by} (${company})` : by} · demande n°${req.number}`,
+    url: `/admin/demandes/${requestId}`,
+    actorId: staff?.id ?? null,
   });
 
   if (!staff) {

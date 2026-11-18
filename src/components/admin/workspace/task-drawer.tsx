@@ -448,7 +448,7 @@ function Comments({ taskId, me, onCount }: { taskId: string; me: string; onCount
           }}
           rows={2}
           maxLength={5000}
-          placeholder="Écrire un message à l’équipe…"
+          placeholder="Écrire un message… (@prénom pour prévenir un collègue)"
           aria-label="Nouveau message"
           className="field-sizing-content block min-h-[60px] w-full resize-none bg-transparent px-3 py-2 text-[14px] text-fg outline-none placeholder:text-muted"
         />

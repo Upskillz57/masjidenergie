@@ -1,3 +1,4 @@
+import { PushBanner } from "@/components/admin/notifications/push";
 import { Workspace, type View } from "@/components/admin/workspace/workspace";
 import { EmptyState, PageHeader } from "@/components/dashboard/ui";
 import { listWorkspace } from "@/lib/admin/tasks-data";
@@ -31,6 +32,7 @@ export default async function WorkspacePage({ searchParams }: { searchParams: Se
         title="Espace de travail"
         description="Les tâches de toute l’équipe, reliées aux demandes d’étude. Glissez une carte pour la faire avancer, ouvrez-la pour l’assigner, la planifier ou en discuter."
       />
+      <PushBanner />
       <Workspace
         tasks={tasks}
         staff={staff}

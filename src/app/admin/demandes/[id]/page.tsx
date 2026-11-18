@@ -357,7 +357,7 @@ export default async function RequestDetailPage({ params }: { params: Promise<{ 
                 required
                 rows={3}
                 maxLength={5000}
-                placeholder="Ajouter un commentaire pour l’équipe…"
+                placeholder="Ajouter un commentaire pour l’équipe… (@prénom pour prévenir un collègue)"
                 aria-label="Nouveau commentaire"
                 className={`${inputClass} h-auto py-2.5`}
               />
